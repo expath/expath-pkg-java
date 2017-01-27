@@ -16,6 +16,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -27,7 +31,7 @@ import java.util.zip.ZipFile;
  */
 class ZipHelper
 {
-    public ZipHelper(File zip)
+    public ZipHelper(Path zip)
     {
         myZip = zip;
     }
@@ -38,13 +42,11 @@ class ZipHelper
      * @return
      *         The temporary directory that has been created, as a File object.
      */
-    public File unzipToTmpDir()
+    public Path unzipToTmpDir()
             throws IOException
     {
-        File tmpdir = File.createTempFile("expath-pkg-", ".d");
-        tmpdir.delete();
-        tmpdir.mkdir();
-        tmpdir.deleteOnExit();
+        Path tmpdir = Files.createTempDirectory("expath-pkg");
+        tmpdir.toFile().deleteOnExit();
         unzip(tmpdir);
         return tmpdir;
     }
@@ -56,58 +58,37 @@ class ZipHelper
      *         The destination directory for the ZIP content.  It is created if
      *         it does not exist yet (but then its parent directory must exist.)
      */
-    public void unzip(File dest_dir)
+    public void unzip(Path dest_dir)
             throws IOException
     {
         // preconditions
-        if ( ! dest_dir.exists() ) {
-            boolean res = dest_dir.mkdir();
-            if ( ! res ) {
-                throw new IOException("Error creating the destination directory: " + dest_dir);
-            }
-        }
-        else if ( ! dest_dir.isDirectory() ) {
+        if (!Files.exists(dest_dir)) {
+            Files.createDirectories(dest_dir);
+        } else if ( !Files.isDirectory(dest_dir) ) {
             throw new IOException("Destination is not a directory: " + dest_dir);
         }
         // loop over entries
-        ZipFile archive = new ZipFile(myZip);
+        ZipFile archive = new ZipFile(myZip.toFile());
         Enumeration entries = archive.entries();
         while ( entries.hasMoreElements() ) {
             ZipEntry entry = (ZipEntry)entries.nextElement();
             if ( ! entry.isDirectory() ) {
                 // detination file
-                File dest = new File(dest_dir, entry.getName());
+                Path dest = dest_dir.resolve(entry.getName());
                 // create parent dir if needed
-                File parent = dest.getParentFile();
-                if ( ! parent.exists() ) {
-                    parent.mkdirs();
+                Path parent = dest.getParent();
+                if ( ! Files.exists(parent) ) {
+                    Files.createDirectories(parent);
                 }
                 // copy the entry to the file
                 InputStream in = archive.getInputStream(entry);
-                OutputStream out = new FileOutputStream(dest);
-                copyInputStream(in, new BufferedOutputStream(out));
+                Files.copy(in, dest, StandardCopyOption.REPLACE_EXISTING);
             }
         }
         archive.close();
     }
 
-    private static void copyInputStream(InputStream in, OutputStream out)
-            throws IOException
-    {
-        try {
-            byte[] buffer = new byte[1024];
-            int len;
-            while ( (len = in.read(buffer)) >= 0 ) {
-                out.write(buffer, 0, len);
-            }
-        }
-        finally {
-            in.close();
-            out.close();
-        }
-    }
-
-    private File myZip;
+    private Path myZip;
 }
 
 

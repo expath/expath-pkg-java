@@ -14,6 +14,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.expath.pkg.repo.FileSystemStorage;
 import org.expath.pkg.repo.PackageException;
 import org.expath.pkg.repo.Repository;
@@ -42,7 +45,7 @@ public class InstallPackage
         File       repo_dir = new File(FunctionalTest.TMP_REPO_DIR);
         Storage    storage  = new FileSystemStorage(repo_dir);
         Repository repo     = new Repository(storage);
-        File       pkg      = new File(xar);
+        Path       pkg      = Paths.get(xar);
         // do it
         repo.installPackage(pkg, true, new FakeInteract());
         // .expath-pkg/packages.txt

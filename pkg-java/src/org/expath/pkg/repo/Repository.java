@@ -20,6 +20,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -211,7 +214,7 @@ public class Repository
             throw new PackageException("The storage is read-only, package install not supported");
         }
         // TODO: Must be moved within the storage class (because we are writing on disk)...
-        File downloaded;
+        Path downloaded;
         try {
             URLConnection connection = pkg.toURL().openConnection();
             connection.connect();
@@ -227,21 +230,9 @@ public class Repository
                 }
             }
             InputStream instream = connection.getInputStream();
-            BufferedInputStream in = new BufferedInputStream(instream);
-            // just to get the name, to have a meaningful name for the tmp file
-            // TODO: use the header Content-Disposition to see if there is a
-            // filename param...
-            String name = new File(pkg.getPath()).getName();
-            downloaded = File.createTempFile(name + "-", "-expath-tmp.xar");
-            FileOutputStream tmp = new FileOutputStream(downloaded);
-            BufferedOutputStream out = new BufferedOutputStream(tmp);
-            int i;
-            byte[] buf = new byte[4096];
-            while ( (i = in.read(buf)) != -1 ) {
-                out.write(buf, 0, i);
-            }
-            out.close();
-            in.close();
+            downloaded = Files.createTempFile(Paths.get(pkg.getPath()).getFileName().toString() + '-', "-expath-tmp" +
+                    ".xar");
+            Files.copy(instream, downloaded);
         }
         catch ( MalformedURLException ex ) {
             throw new OnlineException(pkg, ex);
@@ -269,11 +260,11 @@ public class Repository
      * 
      * @throws PackageException If any error occurs.
      */
-    public Package installPackage(File xar_file, boolean force, UserInteractionStrategy interact)
+    public Package installPackage(Path xar_file, boolean force, UserInteractionStrategy interact)
             throws PackageException
     {
         // preconditions
-        if ( ! xar_file.exists() ) {
+        if ( ! Files.exists(xar_file)) {
             throw new PackageException("Package file does not exist (" + xar_file + ")");
         }
         myStorage.beforeInstall(force, interact);
@@ -284,7 +275,7 @@ public class Repository
         // unzip in the package in destination dir
         try {
             ZipHelper zip = new ZipHelper(xar_file);
-            zip.unzip(tmp_dir);
+            zip.unzip(tmp_dir.toPath());
         }
         catch ( IOException ex ) {
             throw new PackageException("Error unziping the package", ex);
@@ -504,10 +495,14 @@ public class Repository
             catch ( Storage.NotExistException ex ) {
                 throw new PackageException("Package descriptor does NOT exist in: " + p, ex);
             }
-            Package pkg = parser.parse(desc, p, myStorage, this);
-            addPackage(pkg);
-            for ( Extension ext : myExtensions.values() ) {
-                ext.init(this, pkg);
+            try {
+                Package pkg = parser.parse(desc, p, myStorage, this);
+                addPackage(pkg);
+                for ( Extension ext : myExtensions.values() ) {
+                    ext.init(this, pkg);
+                }
+            } catch (PackageException e) {
+                // do not abort: package should be ignored
             }
         }
     }

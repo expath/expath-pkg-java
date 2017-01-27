@@ -9,11 +9,13 @@
 
 package org.expath.pkg.repo;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Set;
 import javax.xml.transform.stream.StreamSource;
 import org.expath.pkg.repo.tools.Logger;
@@ -133,7 +135,8 @@ public class FileSystemStorage
         myXmlFile.removePackageByDir(dir);
         myTxtFile.removePackageByDir(dir);
         // actually delete the files
-        deleteDirRecurse(resolver.myPkgDir);
+//        deleteDirRecurse(resolver.myPkgDir);
+        FileHelper.deleteQuietly(resolver.myPkgDir.toPath());
     }
 
     @Override

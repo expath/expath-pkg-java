@@ -9,12 +9,16 @@
 
 package org.expath.pkg.repo;
 
+import org.expath.pkg.repo.tools.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -96,7 +100,7 @@ public class FileHelper
         if ( failed ) {
             // then try to copy the whole thing
             copyDir(from, to);
-            boolean res = deleteDir(from);
+            boolean res = deleteQuietly(from.toPath());
             if ( ! res ) {
                 System.err.println("Error deleting dir: " + from);
             }
@@ -126,13 +130,7 @@ public class FileHelper
             }
             else {
                 try {
-                    byte[] buffer = new byte[4096];
-                    InputStream in = new FileInputStream(file);
-                    OutputStream out = new FileOutputStream(copied);
-                    int count;
-                    while ( (count = in.read(buffer)) > 0 ) {
-                        out.write(buffer, 0, count);
-                    }
+                    Files.copy(file.toPath(), copied.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
                 catch ( IOException ex ) {
                     throw new PackageException("Error copying '" + file + "' to '" + copied + "'", ex);
@@ -141,22 +139,57 @@ public class FileHelper
         }
     }
 
-    private static boolean deleteDir(File f)
-    {
-        if ( f.isDirectory() ) {
-            boolean res = true;
-            for ( File child : f.listFiles() ) {
-                res = deleteDir(child) && res;
+    public static boolean deleteQuietly(final Path path) {
+        try {
+            if (!Files.isDirectory(path)) {
+                return Files.deleteIfExists(path);
+            } else {
+                Files.walkFileTree(path, deleteDirVisitor);
             }
-            res = f.delete() && res;
-            return res;
-        }
-        else {
-            return f.delete();
+            return true;
+        } catch (final IOException ioe) {
+            LOG.info("Failed to delete " + path.toString(), ioe);
+            return false;
         }
     }
-}
 
+    private final static SimpleFileVisitor<Path> deleteDirVisitor = new DeleteDirVisitor();
+
+    private static class DeleteDirVisitor extends SimpleFileVisitor<Path> {
+        @Override
+        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+            try {
+                Files.deleteIfExists(file);
+            } catch (IOException e) {
+                LOG.info("Failed to delete file " + file.toString());
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+            LOG.info("Failed to delete file " + file.toString());
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(final Path dir, final IOException exc) throws IOException {
+            if (exc != null) {
+                throw exc;
+            }
+
+            try {
+                Files.deleteIfExists(dir);
+            } catch (IOException e) {
+                LOG.info("Failed to delete directory " + dir.toString());
+            }
+            return FileVisitResult.CONTINUE;
+        }
+    }
+
+    /** The logger. */
+    private static final Logger LOG = Logger.getLogger(FileHelper.class);
+}
 
 /* ------------------------------------------------------------------------ */
 /*  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS COMMENT.               */
