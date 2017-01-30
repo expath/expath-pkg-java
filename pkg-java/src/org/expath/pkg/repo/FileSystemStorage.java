@@ -11,11 +11,6 @@ package org.expath.pkg.repo;
 
 import java.io.*;
 import java.net.URI;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Set;
 import javax.xml.transform.stream.StreamSource;
 import org.expath.pkg.repo.tools.Logger;
@@ -161,74 +156,6 @@ public class FileSystemStorage
             throw new PackageException("The package has not been installed in this storage.");
         }
         return (FileSystemResolver) base_resolver;
-    }
-
-    /**
-     * Delete a complete directory (with its descendants).
-     */
-    private void deleteDirRecurse(File target)
-            throws PackageException
-    {
-        // recurse if needed
-        File[] children = target.listFiles();
-        if ( children != null ) {
-            for ( File child : children ) {
-                deleteDirRecurse(child);
-            }
-        }
-        // delete target (if it is a dir, it is empty after recursing)
-        for ( int i = 3; i >= 0; --i ) {
-            boolean success = shallowDelete(target, i);
-            if ( success ) {
-                break;
-            }
-        }
-    }
-
-    /**
-     * Delete a file or a directory.
-     * 
-     * @param target The file or directory to delete. The function does not
-     * recurse, so if {@code target} is a directory, it must be empty.
-     * 
-     * @param remain The remaining attempts at trying. If it is 0, this function
-     * throws an error if the deletion fails.
-     * 
-     * @throws PackageException If {@code remain} is 0 and deleting the target
-     * fails.
-     */
-    @SuppressWarnings("SleepWhileInLoop")
-    private boolean shallowDelete(File target, int remain)
-            throws PackageException
-    {
-        if ( ! target.exists() ) {
-            // trying to delete a non-existing file or dir
-            return true;
-        }
-        boolean success = target.delete();
-        if ( success ) {
-            return true;
-        }
-        // because of Windows file management, we need to try to collect the
-        // garbage before failing, in case deleting a file fails
-        // TODO: Do it only on Windows?
-        // TODO: Is there a better way?
-        System.gc();
-        try {
-            Thread.sleep(100);
-        }
-        catch ( InterruptedException ex ) {
-            throw new PackageException("Interrupted while deleting: " + target);
-        }
-        if ( remain <= 0 ) {
-            if ( target.isDirectory() ) {
-                throw new PackageException("Error deleting a dir: " + target);
-            }
-            else {
-                throw new PackageException("Error deleting a file: " + target);
-            }
-        }
-        return false;
     }
 
     /** The logger. */

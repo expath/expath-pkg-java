@@ -161,14 +161,23 @@ public class FileHelper
             try {
                 Files.deleteIfExists(file);
             } catch (IOException e) {
-                LOG.info("Failed to delete file " + file.toString());
+                System.gc();
+                try {
+                    Thread.sleep(100);
+                } catch ( InterruptedException ex ) {
+                    // no problem
+                }
+                try {
+                    Files.deleteIfExists(file);
+                } catch (IOException e1) {
+                    LOG.info("Failed to delete file " + file.toString());
+                }
             }
             return FileVisitResult.CONTINUE;
         }
 
         @Override
         public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-            LOG.info("Failed to delete file " + file.toString());
             return FileVisitResult.CONTINUE;
         }
 
@@ -181,7 +190,17 @@ public class FileHelper
             try {
                 Files.deleteIfExists(dir);
             } catch (IOException e) {
-                LOG.info("Failed to delete directory " + dir.toString());
+                System.gc();
+                try {
+                    Thread.sleep(100);
+                } catch ( InterruptedException ex ) {
+                    // no problem
+                }
+                try {
+                    Files.deleteIfExists(dir);
+                } catch (IOException e1) {
+                    LOG.info("Failed to delete directory " + dir.toString());
+                }
             }
             return FileVisitResult.CONTINUE;
         }
