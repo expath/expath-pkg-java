@@ -12,6 +12,8 @@
 /pkg-calabash/src/org/expath/pkg/calabash/version.properties
 /pkg-java/src/org/expath/pkg/repo/tui/version.properties
 /pkg-saxon/src/java/org/expath/pkg/saxon/tools/version.properties
-/pkg-java/target/
-/pkg-saxon/target/
-/pkg-calabash/target/
+pkg-java/target/
+pkg-saxon/target/
+pkg-calabash/target/
+pkg-parent/target/
+target/
