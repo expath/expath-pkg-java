@@ -17,6 +17,12 @@
 
     <description>EXPath Packaging module.</description>
 
+    <scm>
+        <connection>scm:git:https://github.com/exist-db/expath-pkg-java.git</connection>
+        <developerConnection>scm:git:https://github.com/exist-db/expath-pkg-java.git</developerConnection>
+        <url>scm:git:https://github.com/exist-db/expath-pkg-java.git</url>
+    </scm>
+
     <modules>
         <module>pkg-parent</module>
         <module>pkg-java</module>

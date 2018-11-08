@@ -19,7 +19,7 @@
     <scm>
         <connection>scm:git:https://github.com/exist-db/expath-pkg-java.git</connection>
         <developerConnection>scm:git:https://github.com/exist-db/expath-pkg-java.git</developerConnection>
-        <url>https://github.com/exist-db/expath-pkg-java</url>
+        <url>scm:git:https://github.com/exist-db/expath-pkg-java.git</url>
     </scm>
 
     <properties>
