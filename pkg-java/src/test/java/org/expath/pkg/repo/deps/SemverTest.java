@@ -18,68 +18,195 @@ import static org.junit.Assert.*;
  * Unit tests of {@code Semver}.
  *
  * @author Florent Georges
+ * @author Adam Retter
  */
 public class SemverTest
 {
     @Test
     public void testParseTemplateMajor() throws PackageException
     {
-        String[] parts = Semver.parse("1");
-        assertEquals("number of parts", 1, parts.length);
-        assertEquals("major number", "1", parts[0]);
+        Semver v = Semver.parse("99");
+        assertEquals("major number", 99, v.getMajorVersion());
+        assertNull("minor number", v.getMinorVersion());
+        assertNull("patch number", v.getPatchVersion());
+        assertNull("pre-release", v.getPreReleaseVersion());
+        assertNull("build metadata", v.getBuildMetadata());
     }
 
     @Test
     public void testParseTemplateMinor() throws PackageException
     {
-        String[] parts = Semver.parse("1.2");
-        assertEquals("number of parts", 2, parts.length);
-        assertEquals("major number", "1", parts[0]);
-        assertEquals("major number", "2", parts[1]);
+        Semver v = Semver.parse("1.2");
+        assertEquals("major number", 1, v.getMajorVersion());
+        assertEquals("minor number", 2, (int)v.getMinorVersion());
+        assertNull("patch number", v.getPatchVersion());
+        assertNull("pre-release", v.getPreReleaseVersion());
+        assertNull("build metadata", v.getBuildMetadata());
     }
 
     @Test
     public void testParseTemplatePatch() throws PackageException
     {
-        String[] parts = Semver.parse("1.2.3");
-        assertEquals("number of parts", 3, parts.length);
-        assertEquals("major number", "1", parts[0]);
-        assertEquals("major number", "2", parts[1]);
-        assertEquals("major number", "3", parts[2]);
+        Semver v = Semver.parse("1.2.3");
+        assertEquals("major number", 1, v.getMajorVersion());
+        assertEquals("minor number", 2, (int)v.getMinorVersion());
+        assertEquals("patch number", 3, (int)v.getPatchVersion());
+        assertNull("pre-release", v.getPreReleaseVersion());
+        assertNull("build metadata", v.getBuildMetadata());
+    }
+
+    @Test
+    public void testParseTemplatePrerelease() throws PackageException
+    {
+        Semver v = Semver.parse("1.2.3-SNAPSHOT");
+        assertEquals("major number", 1, v.getMajorVersion());
+        assertEquals("minor number", 2, (int)v.getMinorVersion());
+        assertEquals("patch number", 3, (int)v.getPatchVersion());
+        assertEquals("pre-release", "SNAPSHOT", v.getPreReleaseVersion());
+        assertNull("build metadata", v.getBuildMetadata());
+    }
+
+    @Test
+    public void testParseTemplateBuildMetadata() throws PackageException
+    {
+        Semver v = Semver.parse("1.2.3-SNAPSHOT+201811090235");
+        assertEquals("major number", 1, v.getMajorVersion());
+        assertEquals("minor number", 2, (int)v.getMinorVersion());
+        assertEquals("patch number", 3, (int)v.getPatchVersion());
+        assertEquals("pre-release", "SNAPSHOT", v.getPreReleaseVersion());
+        assertEquals("build metadata", "201811090235", v.getBuildMetadata());
     }
 
     @Test
     public void testParseTemplateWithZero() throws PackageException
     {
-        String[] parts = Semver.parse("1.0.3");
-        assertEquals("number of parts", 3, parts.length);
-        assertEquals("major number", "1", parts[0]);
-        assertEquals("major number", "0", parts[1]);
-        assertEquals("major number", "3", parts[2]);
+        Semver v = Semver.parse("1.0.3");
+        assertEquals("major number", 1, v.getMajorVersion());
+        assertEquals("minor number", 0, (int)v.getMinorVersion());
+        assertEquals("patch number", 3, (int)v.getPatchVersion());
     }
 
     @Test
     public void testParseTemplateSpecial() throws PackageException
     {
-        String[] parts = Semver.parse("1.2.3beta-4");
-        assertEquals("number of parts", 4, parts.length);
-        assertEquals("major number", "1", parts[0]);
-        assertEquals("major number", "2", parts[1]);
-        assertEquals("major number", "3", parts[2]);
-        assertEquals("major number", "beta-4", parts[3]);
+        Semver v = Semver.parse("1.2.3-beta-4");
+        assertEquals("major number", 1, v.getMajorVersion());
+        assertEquals("minor number", 2, (int)v.getMinorVersion());
+        assertEquals("patch number", 3, (int)v.getPatchVersion());
+        assertEquals("pre-release version", "beta-4", v.getPreReleaseVersion());
+    }
+
+    @Test
+    public void testParseTemplateSpecial2() throws PackageException
+    {
+        Semver v = Semver.parse("1.0-SNAPSHOT");
+        assertEquals("major number", 1, v.getMajorVersion());
+        assertEquals("minor number", 0, (int)v.getMinorVersion());
+        assertNull("patch number", v.getPatchVersion());
+        assertEquals("pre-release version", "SNAPSHOT", v.getPreReleaseVersion());
     }
 
     @Test(expected = PackageException.class)
-    public void testTooMuchParts() throws PackageException
+    public void testParseInvalid() throws PackageException
     {
         Semver.parse("1.2.3.4");
     }
 
     @Test
+    public void testCompareMajor() throws PackageException {
+        final Semver v1 = Semver.parse("1.0.0");
+        final Semver v2 = Semver.parse("2.0.0");
+
+        assertEquals(0, v1.compareTo(v1));
+        assertEquals(0, v2.compareTo(v2));
+
+        assertTrue(v1.compareTo(v2) < 0);
+        assertTrue(v2.compareTo(v1) > 0);
+    }
+
+    @Test
+    public void testCompareMinor() throws PackageException {
+        final Semver v01 = Semver.parse("0.1.0");
+        final Semver v02 = Semver.parse("0.2.0");
+
+        assertEquals(0, v01.compareTo(v01));
+        assertEquals(0, v02.compareTo(v02));
+
+        assertTrue(v01.compareTo(v02) < 0);
+        assertTrue(v02.compareTo(v01) > 0);
+    }
+
+    @Test
+    public void testComparePatch() throws PackageException {
+        final Semver v001 = Semver.parse("0.0.1");
+        final Semver v002 = Semver.parse("0.0.2");
+
+        assertEquals(0, v001.compareTo(v001));
+        assertEquals(0, v002.compareTo(v002));
+
+        assertTrue(v001.compareTo(v002) < 0);
+        assertTrue(v002.compareTo(v001) > 0);
+    }
+
+    @Test
+    public void testComparePrerelease() throws PackageException {
+        final Semver v123_Snapshot = Semver.parse("1.2.3-SNAPSHOT");
+        final Semver v123 = Semver.parse("1.2.3");
+
+        assertEquals(0, v123_Snapshot.compareTo(v123_Snapshot));
+        assertEquals(0, v123.compareTo(v123));
+
+        assertTrue(v123_Snapshot.compareTo(v123) < 0);
+        assertTrue(v123.compareTo(v123_Snapshot) > 0);
+
+
+        final Semver v123_RC1 = Semver.parse("1.2.3-RC1");
+        final Semver v123_RC2 = Semver.parse("1.2.3-RC2");
+
+        assertEquals(0, v123_RC1.compareTo(v123_RC1));
+        assertEquals(0, v123_RC2.compareTo(v123_RC2));
+
+        assertTrue(v123_RC1.compareTo(v123_RC2) < 0);
+        assertTrue(v123_RC2.compareTo(v123_RC1) > 0);
+
+
+        final Semver v123_dRC1 = Semver.parse("1.2.3-RC.1");
+        final Semver v123_dRC2 = Semver.parse("1.2.3-RC.2");
+
+        assertEquals(0, v123_dRC1.compareTo(v123_dRC1));
+        assertEquals(0, v123_dRC2.compareTo(v123_dRC2));
+
+        assertTrue(v123_dRC1.compareTo(v123_dRC2) < 0);
+        assertTrue(v123_dRC2.compareTo(v123_dRC1) > 0);
+
+
+        final Semver v123_dRC11 = Semver.parse("1.2.3-RC.1.1");
+
+        assertEquals(0, v123_dRC11.compareTo(v123_dRC11));
+
+        assertTrue(v123_dRC1.compareTo(v123_dRC11) < 0);
+        assertTrue(v123_dRC11.compareTo(v123_dRC1) > 0);
+        assertTrue(v123_dRC11.compareTo(v123_dRC2) < 0);
+        assertTrue(v123_dRC2.compareTo(v123_dRC11) > 0);
+    }
+
+    @Test
+    public void testCompareBuildMetadata() throws PackageException {
+        final Semver v123 = Semver.parse("1.2.3");
+        final Semver v123_b2017 = Semver.parse("1.2.3+2017");
+        final Semver v123_b2018 = Semver.parse("1.2.3+2018");
+
+        assertEquals(0, v123.compareTo(v123_b2017));
+        assertEquals(0, v123_b2017.compareTo(v123));
+        assertEquals(0, v123_b2017.compareTo(v123_b2018));
+        assertEquals(0, v123_b2018.compareTo(v123_b2017));
+    }
+
+    @Test
     public void testMatchesSubversion() throws PackageException
     {
-        Semver template = new Semver("1.2");
-        Semver version = new Semver("1.2.3");
+        Semver template = Semver.parse("1.2");
+        Semver version = Semver.parse("1.2.3");
         boolean result = template.matches(version);
         assertTrue("the version matches the template", result);
     }
@@ -87,8 +214,8 @@ public class SemverTest
     @Test
     public void testMatchesMin_1() throws PackageException
     {
-        Semver template = new Semver("1.2");
-        Semver version = new Semver("1.2.3");
+        Semver template = Semver.parse("1.2");
+        Semver version = Semver.parse("1.2.3");
         boolean result = template.matchesMin(version);
         assertTrue("the version matches the template as minimum", result);
     }
@@ -96,8 +223,8 @@ public class SemverTest
     @Test
     public void testMatchesMin_2() throws PackageException
     {
-        Semver template = new Semver("1.2.3");
-        Semver version = new Semver("1.2.3");
+        Semver template = Semver.parse("1.2.3");
+        Semver version = Semver.parse("1.2.3");
         boolean result = template.matchesMin(version);
         assertTrue("the version matches the template as minimum", result);
     }
@@ -105,8 +232,8 @@ public class SemverTest
     @Test
     public void testMatchesMin_3() throws PackageException
     {
-        Semver template = new Semver("1");
-        Semver version = new Semver("1.2.3");
+        Semver template = Semver.parse("1");
+        Semver version = Semver.parse("1.2.3");
         boolean result = template.matchesMin(version);
         assertTrue("the version matches the template as minimum", result);
     }
@@ -114,8 +241,8 @@ public class SemverTest
     @Test
     public void testMatchesMin_4() throws PackageException
     {
-        Semver template = new Semver("1.2.3alpha");
-        Semver version = new Semver("1.2.3");
+        Semver template = Semver.parse("1.2.3-alpha");
+        Semver version = Semver.parse("1.2.3");
         boolean result = template.matchesMin(version);
         assertTrue("the version matches the template as minimum", result);
     }
@@ -123,8 +250,8 @@ public class SemverTest
     @Test
     public void testMatchesMin_5() throws PackageException
     {
-        Semver template = new Semver("1.2");
-        Semver version = new Semver("1.2.3alpha");
+        Semver template = Semver.parse("1.2");
+        Semver version = Semver.parse("1.2.3-alpha");
         boolean result = template.matchesMin(version);
         assertTrue("the version matches the template as minimum", result);
     }
@@ -132,8 +259,8 @@ public class SemverTest
     @Test
     public void testMatchesMin_6() throws PackageException
     {
-        Semver template = new Semver("1.2.3");
-        Semver version = new Semver("1.2.3alpha");
+        Semver template = Semver.parse("1.2.3");
+        Semver version = Semver.parse("1.2.3-alpha");
         boolean result = template.matchesMin(version);
         assertFalse("the version matches the template as minimum", result);
     }
@@ -141,8 +268,8 @@ public class SemverTest
     @Test
     public void testMatchesMin_7() throws PackageException
     {
-        Semver template = new Semver("1.2.3alpha");
-        Semver version = new Semver("1.2.3alpha");
+        Semver template = Semver.parse("1.2.3-alpha");
+        Semver version = Semver.parse("1.2.3-alpha");
         boolean result = template.matchesMin(version);
         assertTrue("the version matches the template as minimum", result);
     }
@@ -150,8 +277,8 @@ public class SemverTest
     @Test
     public void testMatchesMax_1() throws PackageException
     {
-        Semver template = new Semver("1.2");
-        Semver version = new Semver("1.2.3");
+        Semver template = Semver.parse("1.2");
+        Semver version = Semver.parse("1.2.3");
         boolean result = template.matchesMax(version);
         assertTrue("the version matches the template as maximum", result);
     }
@@ -159,8 +286,8 @@ public class SemverTest
     @Test
     public void testMatchesMax_2() throws PackageException
     {
-        Semver template = new Semver("1.2.3");
-        Semver version = new Semver("1.2.3");
+        Semver template = Semver.parse("1.2.3");
+        Semver version = Semver.parse("1.2.3");
         boolean result = template.matchesMax(version);
         assertTrue("the version matches the template as maximum", result);
     }
@@ -168,8 +295,8 @@ public class SemverTest
     @Test
     public void testMatchesMax_3() throws PackageException
     {
-        Semver template = new Semver("1");
-        Semver version = new Semver("1.2.3");
+        Semver template = Semver.parse("1");
+        Semver version = Semver.parse("1.2.3");
         boolean result = template.matchesMax(version);
         assertTrue("the version matches the template as maximum", result);
     }
@@ -177,8 +304,8 @@ public class SemverTest
     @Test
     public void testMatchesMax_4() throws PackageException
     {
-        Semver template = new Semver("1.2.3alpha");
-        Semver version = new Semver("1.2.3");
+        Semver template = Semver.parse("1.2.3-alpha");
+        Semver version = Semver.parse("1.2.3");
         boolean result = template.matchesMax(version);
         assertFalse("the version matches the template as maximum", result);
     }
@@ -186,8 +313,8 @@ public class SemverTest
     @Test
     public void testMatchesMax_5() throws PackageException
     {
-        Semver template = new Semver("1.2");
-        Semver version = new Semver("1.2.3alpha");
+        Semver template = Semver.parse("1.2");
+        Semver version = Semver.parse("1.2.3-alpha");
         boolean result = template.matchesMax(version);
         assertTrue("the version matches the template as maximum", result);
     }
@@ -195,8 +322,8 @@ public class SemverTest
     @Test
     public void testMatchesMax_6() throws PackageException
     {
-        Semver template = new Semver("1.2.3");
-        Semver version = new Semver("1.2.3alpha");
+        Semver template = Semver.parse("1.2.3");
+        Semver version = Semver.parse("1.2.3-alpha");
         boolean result = template.matchesMax(version);
         assertTrue("the version matches the template as maximum", result);
     }
@@ -204,8 +331,8 @@ public class SemverTest
     @Test
     public void testMatchesMax_7() throws PackageException
     {
-        Semver template = new Semver("1.2.3alpha");
-        Semver version = new Semver("1.2.3alpha");
+        Semver template = Semver.parse("1.2.3-alpha");
+        Semver version = Semver.parse("1.2.3-alpha");
         boolean result = template.matchesMax(version);
         assertTrue("the version matches the template as maximum", result);
     }
@@ -229,5 +356,5 @@ public class SemverTest
 /*                                                                          */
 /*  The Initial Developer of the Original Code is Florent Georges.          */
 /*                                                                          */
-/*  Contributor(s): none.                                                   */
+/*  Contributor(s): Adam Retter.                                            */
 /* ------------------------------------------------------------------------ */

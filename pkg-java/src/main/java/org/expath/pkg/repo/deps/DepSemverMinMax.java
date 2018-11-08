@@ -22,15 +22,15 @@ class DepSemverMinMax
     public DepSemverMinMax(String min, String max)
             throws PackageException
     {
-        myMin = new Semver(min);
-        myMax = new Semver(max);
+        myMin = Semver.parse(min);
+        myMax = Semver.parse(max);
     }
 
     @Override
     public boolean isCompatible(String version)
             throws PackageException
     {
-        Semver rhs = new Semver(version);
+        Semver rhs = Semver.parse(version);
         return myMin.matchesMin(rhs) && myMax.matchesMax(rhs) && !myMax.matches(rhs);
     }
 
