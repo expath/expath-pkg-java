@@ -12,6 +12,7 @@ package org.expath.pkg.repo;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.xml.transform.Source;
@@ -29,8 +30,7 @@ public class UniverseTest
 {
     private Path pkgComponentFile(String repo, String lib, String version, String component)
     {
-        System.err.println("test/repos/" + repo + "/" + lib + "-" + version + "/" + lib + "/" + component);
-        return Paths.get("test/repos/" + repo + "/" + lib + "-" + version + "/" + lib + "/" + component);
+        return Paths.get("target/test-classes/repos/" + repo + "/" + lib + "-" + version + "/" + lib + "/" + component);
     }
 
     private Path sourceFile(Source src)
@@ -55,9 +55,30 @@ public class UniverseTest
     private Repository getRepository(String repo)
             throws PackageException
     {
-        Path repo_dir = Paths.get("test/repos/" + repo);
-        Storage storage = new FileSystemStorage(repo_dir);
-        return new Repository(storage);
+        final Path repo_dir = Paths.get("target/test-classes/repos/" + repo );
+        if (Files.exists(repo_dir) && Files.isDirectory(repo_dir)) {
+            final Storage storage = new FileSystemStorage(repo_dir);
+            return new Repository(storage);
+        }
+
+        return null;
+
+
+//        final URL packageXmlUri = getClass().getClassLoader().getResource("repos/" + repo + "/.expath-pkg/packages.xml");
+//        if (packageXmlUri != null) {
+//            try {
+//                final Path packageXml = Paths.get(packageXmlUri.toURI());
+//                if (Files.exists(packageXml)) {
+//                    final Path repo_dir = packageXml.getParent().getParent();
+//                    final Storage storage = new FileSystemStorage(repo_dir);
+//                    return new Repository(storage);
+//                }
+//            } catch (final URISyntaxException e) {
+//                throw new PackageException(e.getMessage(), e);
+//            }
+//        }
+//
+//        return null;
     }
 
     private Package latestPackage(Repository repo, String name)

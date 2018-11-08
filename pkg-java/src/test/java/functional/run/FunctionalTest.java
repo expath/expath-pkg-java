@@ -27,22 +27,17 @@ public class FunctionalTest
 {
     public static final String HELLO_XAR_OLD = "../samples/hello-pkg/hello-1.1.xar";
     public static final String HELLO_XAR_NEW = "../samples/hello-pkg/hello-1.2.xar";
-    public static final String TMP_REPO_DIR  = "../tmp/repo";
 
     @Test
     public void runFunctionalTests()
             throws Throwable
     {
         // Initialize a new temporary repo.
-        Path repo_dir = Paths.get(TMP_REPO_DIR);
-        if ( Files.exists(repo_dir) ) {
-            fail("The directory exists: " + TMP_REPO_DIR);
-        }
-        Files.createDirectories(repo_dir);
+        Path repo_dir = Files.createTempDirectory("expath-pkg-java-tmp-repo");
 
         // Run the actual tests...
         InstallPackage test = new InstallPackage();
-        test.testInstall();
+        test.testInstall(repo_dir);
 
         // Tear down the temporary repo.
         FileHelper.deleteQuietly(repo_dir);

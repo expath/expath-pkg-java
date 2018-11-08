@@ -10,7 +10,7 @@ import net.sf.saxon.value.SequenceType;
 import static net.sf.saxon.expr.StaticProperty.EXACTLY_ONE;
 
 public class SimpleFunction extends ExtensionFunctionDefinition {
-   private static final String NS_PREFIX = "ext";
+   private static final String NS_PREFIX = "com.example.ext";
    private static final String NS_URI = "http://www.example.com/ext";
    private static final String LOCAL_NAME = "hello";
 

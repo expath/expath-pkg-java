@@ -54,7 +54,7 @@ public class ConfigHelperTest
     public ConfigHelperTest()
             throws PackageException
     {
-        Storage storage = new FileSystemStorage(new File("test/java/transform/repo").toPath());
+        Storage storage = new FileSystemStorage(new File("target/test-classes/transform/repo").toPath());
         REPO = new SaxonRepository(storage);
     }
 

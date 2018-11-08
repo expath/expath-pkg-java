@@ -28,7 +28,7 @@ public class FileSystemResolverTest
             throws Exception
     {
         // get the repo
-        Path repodir = Paths.get("test/repos/simple");
+        Path repodir = Paths.get("target/test-classes/repos/simple");
         Storage storage = new FileSystemStorage(repodir);
         Repository repo = new Repository(storage);
         // get the pkg

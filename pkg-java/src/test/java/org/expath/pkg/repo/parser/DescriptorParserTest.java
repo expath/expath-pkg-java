@@ -40,7 +40,7 @@ public class DescriptorParserTest
         // the SUT
         DescriptorParser sut = new DescriptorParser();
         Source desc = new StreamSource(PKG_DIR + "expath-pkg.xml");
-        Storage storage = new FileSystemStorage(Paths.get("test/repos/simple"));
+        Storage storage = new FileSystemStorage(Paths.get("target/test-classes/repos/simple"));
         // get the package
         Package pkg = sut.parse(desc, "hello-1.1.1", storage, null);
         // the simple properties
@@ -70,7 +70,7 @@ public class DescriptorParserTest
         assertEquals(msg, f.toAbsolutePath(), Paths.get(uri).toAbsolutePath());
     }
 
-    static private final String PKG_DIR = "test/repos/simple/hello-1.1.1/";
+    static private final String PKG_DIR = "target/test-classes/repos/simple/hello-1.1.1/";
 }
 
 

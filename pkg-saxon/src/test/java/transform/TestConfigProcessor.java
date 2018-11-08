@@ -62,7 +62,7 @@ public class TestConfigProcessor
     public TestConfigProcessor()
             throws PackageException
     {
-        Storage storage = new FileSystemStorage(new File("test/java/transform/repo").toPath());
+        Storage storage = new FileSystemStorage(new File("target/test-classes/transform/repo").toPath());
         REPO = new SaxonRepository(storage);
     }
 
@@ -312,8 +312,7 @@ public class TestConfigProcessor
         ConfigHelper helper = new ConfigHelper(REPO);
         helper.config(config);
 
-        //StaticQueryContext static_ctxt = config.newStaticQueryContext();
-        StaticQueryContext static_ctxt = new StaticQueryContext(config);
+        StaticQueryContext static_ctxt = config.newStaticQueryContext();
         Reader query = new FileReader(new File(QUERY_STD));
         XQueryExpression expr = static_ctxt.compileQuery(query);
         DynamicQueryContext dyn_ctxt = new DynamicQueryContext(config);
@@ -354,8 +353,7 @@ public class TestConfigProcessor
         ConfigHelper helper = new ConfigHelper(REPO);
         helper.config(config);
 
-        //StaticQueryContext static_ctxt = config.newStaticQueryContext();
-        StaticQueryContext static_ctxt = new StaticQueryContext(config);
+        StaticQueryContext static_ctxt = config.newStaticQueryContext();
         Reader query = new FileReader(new File(QUERY_JAVA));
         XQueryExpression expr = static_ctxt.compileQuery(query);
         DynamicQueryContext dyn_ctxt = new DynamicQueryContext(config);
@@ -407,10 +405,10 @@ public class TestConfigProcessor
 //    }
 
     private SaxonRepository REPO;
-    private static final String STYLE_STD  = "test/java/transform/style.xsl";
-    private static final String STYLE_JAVA = "test/java/transform/using-java.xsl";
-    private static final String QUERY_STD  = "test/java/transform/query.xq";
-    private static final String QUERY_JAVA = "test/java/transform/using-java.xq";
+    private static final String STYLE_STD  = "target/test-classes/transform/style.xsl";
+    private static final String STYLE_JAVA = "target/test-classes/transform/using-java.xsl";
+    private static final String QUERY_STD  = "target/test-classes/transform/query.xq";
+    private static final String QUERY_JAVA = "target/test-classes/transform/using-java.xq";
     // private static final OutputStream OUT  = System.err;
     private static final OutputStream OUT  = new DevNull();
 

@@ -21,7 +21,7 @@ public class XarFileSource implements XarSource {
 
     @Override
     public boolean isValid() {
-        return Files.exists(xarFile) && Files.isDirectory(xarFile);
+        return Files.exists(xarFile) && !Files.isDirectory(xarFile);
     }
 
     @Override

@@ -9,6 +9,8 @@
 
 package org.expath.pkg.repo;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -294,18 +296,17 @@ public class FileSystemStorage
                 LOG.fine(msg);
                 throw new NotExistException(msg);
             }
-//            try {
-                //InputStream in = new FileInputStream(f);
-                //StreamSource src = new StreamSource(in);
-                //src.setSystemId(f.toURI().toString());
-                StreamSource src = new StreamSource(f.toFile());
+            try {
+                final InputStream in = Files.newInputStream(f);
+                StreamSource src = new StreamSource(in);
+                src.setSystemId(f.toUri().toString());
                 return src;
-//            }
-//            catch ( IOException ex ) {
-//                String msg = "File '" + f + "' exists but is not found";
-//                LOG.severe(msg);
-//                throw new PackageException(msg, ex);
-//            }
+            }
+            catch ( IOException ex ) {
+                String msg = "File '" + f + "' exists but is not found";
+                LOG.severe(msg);
+                throw new PackageException(msg, ex);
+            }
         }
 
         private String getDirName()

@@ -29,7 +29,7 @@ public class RepositoryTest
     public void testConstructor()
             throws Exception
     {
-        Storage storage = new FileSystemStorage(Paths.get("test/repos/simple"));
+        Storage storage = new FileSystemStorage(Paths.get("target/test-classes/repos/simple"));
         Repository sut = new Repository(storage);
         Collection<Packages> packages_list = sut.listPackages();
         assertEquals("number of packages", 1, packages_list.size());

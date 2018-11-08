@@ -26,21 +26,20 @@ import static org.junit.Assert.*;
  */
 public class InstallPackage
 {
-    public void testInstall()
+    public void testInstall(final Path repo_dir)
             throws Exception
     {
-        testOne(FunctionalTest.HELLO_XAR_OLD, PACKAGES_TXT_CONTENT_OLD, PACKAGES_XML_CONTENT_OLD, "hello-1.1/hello");
-        testOne(FunctionalTest.HELLO_XAR_NEW, PACKAGES_TXT_CONTENT_NEW, PACKAGES_XML_CONTENT_NEW, "hello-1.2/content");
+        testOne(repo_dir, FunctionalTest.HELLO_XAR_OLD, PACKAGES_TXT_CONTENT_OLD, PACKAGES_XML_CONTENT_OLD, "hello-1.1/hello");
+        testOne(repo_dir, FunctionalTest.HELLO_XAR_NEW, PACKAGES_TXT_CONTENT_NEW, PACKAGES_XML_CONTENT_NEW, "hello-1.2/content");
     }
 
-    private void testOne(String xar, String txt_content, String xml_content, String content_dir)
+    private void testOne(final Path repo_dir, String xar, String txt_content, String xml_content, String content_dir)
             throws Exception
     {
         // the SUT
-        Path       repo_dir = Paths.get(FunctionalTest.TMP_REPO_DIR);
         Storage    storage  = new FileSystemStorage(repo_dir);
         Repository repo     = new Repository(storage);
-        Path       pkg      = Paths.get(xar);
+        Path       pkg      = Paths.get(".").resolve(xar).toAbsolutePath().normalize();
         // do it
         repo.installPackage(new XarFileSource(pkg), true, new FakeInteract());
         // .expath-pkg/packages.txt

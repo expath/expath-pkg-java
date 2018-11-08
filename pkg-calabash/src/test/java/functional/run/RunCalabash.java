@@ -236,8 +236,8 @@ public class RunCalabash
         }
     }
 
-    private static final String PIPE_DIR = "test/functional/run/";
-    private static final String REPO     = "test/functional/run/repo/";
+    private static final String PIPE_DIR = "target/test-classes/functional/run/";
+    private static final String REPO     = "target/test-classes/functional/run/repo/";
 }
 
 
