@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.expath.packaging</groupId>
+        <groupId>org.exist-db.thirdparty.org.expath.packaging</groupId>
         <artifactId>pkg-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pkg-parent/pom.xml</relativePath>
@@ -17,9 +17,9 @@
     <description>Implementation of EXPath Packaging for Saxon</description>
 
     <scm>
-        <connection>scm:git:git://github.com/adamretter/expath-pkg-java.git</connection> <!-- TODO when ready change me to scm:git:git://github.com/expath/expath-pkg-java.git -->
-        <developerConnection>scm:git:git://github.com/adamretter/expath-pkg-java.git</developerConnection> <!-- TODO when ready change me to scm:git:git://github.com/expath/expath-pkg-java.git -->
-        <url>http://github.com/adamretter/expath-pkg-java</url>
+        <connection>scm:git:git://github.com/exist-db/expath-pkg-java.git</connection>
+        <developerConnection>scm:git:git://github.com/exist-db/expath-pkg-java.git</developerConnection>
+        <url>http://github.com/exist-db/expath-pkg-java</url>
     </scm>
 
     <dependencies>
