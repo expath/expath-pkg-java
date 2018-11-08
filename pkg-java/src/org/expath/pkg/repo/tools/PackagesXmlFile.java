@@ -9,9 +9,9 @@
 
 package org.expath.pkg.repo.tools;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Path;
 import javax.xml.transform.Transformer;
 import org.expath.pkg.repo.Package;
 import org.expath.pkg.repo.PackageException;
@@ -34,7 +34,7 @@ public class PackagesXmlFile
      * @throws PackageException If any error when creating the file (if it does
      *     not exist yet).
      */
-    public PackagesXmlFile(File file)
+    public PackagesXmlFile(Path file)
             throws PackageException
     {
         super(file);

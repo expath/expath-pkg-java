@@ -9,8 +9,8 @@
 
 package org.expath.pkg.repo;
 
-import java.io.File;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Set;
 import javax.xml.transform.Source;
 
@@ -66,7 +66,7 @@ public abstract class Storage
     /**
      * TODO: ...
      */
-    public abstract File makeTempDir(String prefix)
+    public abstract Path makeTempDir(String prefix)
             throws PackageException;
 
     /**
@@ -90,7 +90,7 @@ public abstract class Storage
      * it). If it is not using the temporary directory anymore, it must delete
      * it.
      */
-    public abstract void storeInstallDir(File dir, String key, Package pkg)
+    public abstract void storeInstallDir(Path dir, String key, Package pkg)
             throws PackageException;
 
     /**

@@ -9,8 +9,9 @@
 
 package org.expath.pkg.repo;
 
-import java.io.*;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Set;
 import javax.xml.transform.stream.StreamSource;
 import org.expath.pkg.repo.tools.Logger;
@@ -25,32 +26,32 @@ import org.expath.pkg.repo.tools.PackagesXmlFile;
 public class FileSystemStorage
         extends Storage
 {
-    public FileSystemStorage(File root)
+    public FileSystemStorage(Path root)
             throws PackageException
     {
         // the repository root directory
         if ( root == null ) {
             throw new NullPointerException("The repository root directory is null");
         }
-        if ( ! root.exists() ) {
+        if ( ! Files.exists(root) ) {
             String msg = "The repository root directory does not exist: " + root;
             throw new PackageException(msg);
         }
-        if ( ! root.isDirectory() ) {
+        if ( ! Files.isDirectory(root) ) {
             String msg = "The repository root directory is not a directory: " + root;
             throw new PackageException(msg);
         }
         myRoot = root;
-        File dir = new File(root, ".expath-pkg");
+        Path dir = root.resolve(".expath-pkg");
         FileHelper.ensureDir(dir);
         myPrivate = dir;
-        File xmlfile = new File(dir, "packages.xml");
+        Path xmlfile = dir.resolve("packages.xml");
         myXmlFile = new PackagesXmlFile(xmlfile);
-        File txtfile = new File(dir, "packages.txt");
+        Path txtfile = dir.resolve("packages.txt");
         myTxtFile = new PackagesTxtFile(txtfile);
     }
 
-    public File getRootDirectory()
+    public Path getRootDirectory()
     {
         return myRoot;
     }
@@ -65,7 +66,7 @@ public class FileSystemStorage
     public PackageResolver makePackageResolver(String rsrc_name, String abbrev)
                  throws PackageException
     {
-        File pkg_root = rsrc_name == null ? null : new File(myRoot, rsrc_name);
+        Path pkg_root = rsrc_name == null ? null : myRoot.resolve(rsrc_name);
         return new FileSystemResolver(pkg_root, abbrev, rsrc_name);
     }
 
@@ -84,7 +85,7 @@ public class FileSystemStorage
     }
 
     @Override
-    public File makeTempDir(String prefix)
+    public Path makeTempDir(String prefix)
             throws PackageException
     {
         return FileHelper.makeTempDir(prefix, myPrivate);
@@ -94,16 +95,16 @@ public class FileSystemStorage
     public boolean packageKeyExists(String key)
             throws PackageException
     {
-        File f = new File(myRoot, key);
-        return f.exists();
+        Path f = myRoot.resolve(key);
+        return Files.exists(f);
     }
 
     @Override
-    public void storeInstallDir(File dir, String key, Package pkg)
+    public void storeInstallDir(Path dir, String key, Package pkg)
             throws PackageException
     {
         // move the temporary dir content to the repository
-        File dest = new File(myRoot, key);
+        Path dest = myRoot.resolve(key);
         FileHelper.renameTmpDir(dir, dest);
         FileSystemResolver resolver = getResolver(pkg);
         resolver.setPkgDir(dest);
@@ -116,7 +117,7 @@ public class FileSystemStorage
         FileSystemResolver resolver = getResolver(pkg);
         String dir = resolver.getDirName();
         myXmlFile.addPackage(pkg, dir);
-        File txt_file = new File(myPrivate, "packages.txt");
+        Path txt_file = myPrivate.resolve("packages.txt");
         myTxtFile.addPackage(pkg, dir);
     }
 
@@ -131,13 +132,13 @@ public class FileSystemStorage
         myTxtFile.removePackageByDir(dir);
         // actually delete the files
 //        deleteDirRecurse(resolver.myPkgDir);
-        FileHelper.deleteQuietly(resolver.myPkgDir.toPath());
+        FileHelper.deleteQuietly(resolver.myPkgDir);
     }
 
     @Override
     public String toString()
     {
-        return "File system storage in " + myRoot.getAbsolutePath();
+        return "File system storage in " + myRoot.toAbsolutePath();
     }
 
     /**
@@ -162,9 +163,9 @@ public class FileSystemStorage
     private static final Logger LOG = Logger.getLogger(FileSystemStorage.class);
 
     /** The root dir of the repo. */
-    private File myRoot;
+    private Path myRoot;
     /** The private area.  Must be used only through getPrivateFile(). */
-    private File myPrivate;
+    private Path myPrivate;
     /** The package list, XML format, in [repo]/.expath-pkg/packages.xml. */
     private final PackagesXmlFile myXmlFile;
     /** The package list, text format, in [repo]/.expath-pkg/packages.txt. */
@@ -175,7 +176,7 @@ public class FileSystemStorage
     public class FileSystemResolver
             extends PackageResolver
     {
-        public FileSystemResolver(File pkg_dir, String abbrev, String rsrc_name)
+        public FileSystemResolver(Path pkg_dir, String abbrev, String rsrc_name)
                  throws PackageException
         {
             myPkgAbbrev = abbrev;
@@ -192,10 +193,10 @@ public class FileSystemStorage
         @Override
         public URI getContentDirBaseURI()
         {
-            return myContentDir.toURI();
+            return myContentDir.toUri();
         }
 
-        private void setPkgDir(File dir)
+        private void setPkgDir(Path dir)
                  throws PackageException
         {
             myPkgDir = dir;
@@ -207,15 +208,15 @@ public class FileSystemStorage
             }
         }
 
-        private File getContenDir(File pkg_dir, String abbrev)
+        private Path getContenDir(Path pkg_dir, String abbrev)
                  throws PackageException
         {
-            File old_style = new File(pkg_dir, abbrev);
-            File new_style = new File(pkg_dir, "content");
-            boolean old_exists = old_style.exists();
-            boolean new_exists = new_style.exists();
-            boolean old_isdir = old_style.isDirectory();
-            boolean new_isdir = new_style.isDirectory();
+            Path old_style = pkg_dir.resolve(abbrev);
+            Path new_style = pkg_dir.resolve("content");
+            boolean old_exists = Files.exists(old_style);
+            boolean new_exists = Files.exists(new_style);
+            boolean old_isdir = Files.isDirectory(old_style);
+            boolean new_isdir = Files.isDirectory(new_style);
             LOG.finer("Content dir ''{0}'' (exists:{1}/isdir:{2}), and ''{3}'' (exists:{4}/isdir:{5})",
                     new_style, new_exists, new_isdir, old_style, old_exists, old_isdir);
             if ( ! old_exists && ! new_exists ) {
@@ -250,17 +251,17 @@ public class FileSystemStorage
             }
         }
 
-        public File resolveResourceAsFile(String path)
+        public Path resolveResourceAsFile(String path)
         {
-            return new File(myPkgDir, path);
+            return myPkgDir.resolve(path);
         }
 
-        public File resolveComponentAsFile(String path)
+        public Path resolveComponentAsFile(String path)
         {
             if ( myContentDir == null ) {
                 return null;
             }
-            return new File(myContentDir, path);
+            return myContentDir.resolve(path);
         }
 
         @Override
@@ -282,39 +283,40 @@ public class FileSystemStorage
             return resolveWithin(path, myContentDir);
         }
 
-        private StreamSource resolveWithin(String path, File dir)
+        private StreamSource resolveWithin(String path, Path dir)
                 throws PackageException
                      , NotExistException
         {
             LOG.fine("Trying to resolve ''{0}'' within ''{1}''", path, dir);
-            File f = new File(dir, path);
-            if ( ! f.exists() ) {
+            Path f = dir.resolve(path);
+            if ( ! Files.exists(f) ) {
                 String msg = "File '" + f + "' does not exist";
                 LOG.fine(msg);
                 throw new NotExistException(msg);
             }
-            try {
-                InputStream in = new FileInputStream(f);
-                StreamSource src = new StreamSource(in);
-                src.setSystemId(f.toURI().toString());
+//            try {
+                //InputStream in = new FileInputStream(f);
+                //StreamSource src = new StreamSource(in);
+                //src.setSystemId(f.toURI().toString());
+                StreamSource src = new StreamSource(f.toFile());
                 return src;
-            }
-            catch ( FileNotFoundException ex ) {
-                String msg = "File '" + f + "' exists but is not found";
-                LOG.severe(msg);
-                throw new PackageException(msg, ex);
-            }
+//            }
+//            catch ( IOException ex ) {
+//                String msg = "File '" + f + "' exists but is not found";
+//                LOG.severe(msg);
+//                throw new PackageException(msg, ex);
+//            }
         }
 
         private String getDirName()
         {
-            return myPkgDir.getName();
+            return myPkgDir.getFileName().toString();
         }
 
         private final String myRsrcName;
         private final String myPkgAbbrev;
-        private File         myPkgDir;
-        private File         myContentDir;
+        private Path         myPkgDir;
+        private Path         myContentDir;
     }
 }
 

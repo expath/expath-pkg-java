@@ -74,7 +74,7 @@ public class SaxonRepository
     public Package installPackage(File pkg, boolean force, UserInteractionStrategy interact)
             throws PackageException
     {
-        return myParent.installPackage(pkg, force, interact);
+        return myParent.installPackage(pkg.toPath(), force, interact);
     }
 
     /**

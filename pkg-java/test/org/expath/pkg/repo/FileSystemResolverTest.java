@@ -9,8 +9,10 @@
 
 package org.expath.pkg.repo;
 
-import java.io.File;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,7 +28,7 @@ public class FileSystemResolverTest
             throws Exception
     {
         // get the repo
-        File repodir = new File("test/repos/simple");
+        Path repodir = Paths.get("test/repos/simple");
         Storage storage = new FileSystemStorage(repodir);
         Repository repo = new Repository(storage);
         // get the pkg
@@ -36,7 +38,7 @@ public class FileSystemResolverTest
         Storage.PackageResolver resolver = pkg.getResolver();
         // the base URI must be a file: URI, absolute, with "hello-1.1.1/hello/"
         // resolved against the repo dir
-        URI repouri  = repodir.toURI();
+        URI repouri  = repodir.toUri();
         URI expected = repouri.resolve("hello-1.1.1/hello/");
         URI actual   = resolver.getContentDirBaseURI();
         Assert.assertEquals("base URI scheme is file:", "file", actual.getScheme());

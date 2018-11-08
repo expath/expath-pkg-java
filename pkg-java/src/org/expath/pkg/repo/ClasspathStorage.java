@@ -9,11 +9,11 @@
 
 package org.expath.pkg.repo;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Set;
 import javax.xml.transform.stream.StreamSource;
 import org.expath.pkg.repo.tools.Logger;
@@ -68,7 +68,7 @@ public class ClasspathStorage
     }
 
     @Override
-    public File makeTempDir(String prefix)
+    public Path makeTempDir(String prefix)
             throws PackageException
     {
         throw new UnsupportedOperationException("Classpath storage is read only.");
@@ -83,7 +83,7 @@ public class ClasspathStorage
     }
 
     @Override
-    public void storeInstallDir(File dir, String key, Package pkg)
+    public void storeInstallDir(Path dir, String key, Package pkg)
             throws PackageException
     {
         throw new UnsupportedOperationException("Classpath storage is read only.");

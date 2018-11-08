@@ -34,7 +34,7 @@ public class PkgInitializer
         if ( prop != null ) {
             try {
                 File dir = new File(prop);
-                Storage storage = new FileSystemStorage(dir);
+                Storage storage = new FileSystemStorage(dir.toPath());
                 SaxonRepository repo = new SaxonRepository(storage);
                 ConfigHelper expath_helper = new ConfigHelper(repo);
                 expath_helper.config(c);

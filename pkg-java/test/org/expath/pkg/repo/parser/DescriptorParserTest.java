@@ -13,7 +13,9 @@ import java.net.URISyntaxException;
 import javax.xml.transform.Source;
 import java.net.URI;
 import org.expath.pkg.repo.Storage.PackageResolver;
-import java.io.File;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.xml.transform.stream.StreamSource;
 import org.expath.pkg.repo.FileSystemStorage;
 import org.expath.pkg.repo.Package;
@@ -38,7 +40,7 @@ public class DescriptorParserTest
         // the SUT
         DescriptorParser sut = new DescriptorParser();
         Source desc = new StreamSource(PKG_DIR + "expath-pkg.xml");
-        Storage storage = new FileSystemStorage(new File("test/repos/simple"));
+        Storage storage = new FileSystemStorage(Paths.get("test/repos/simple"));
         // get the package
         Package pkg = sut.parse(desc, "hello-1.1.1", storage, null);
         // the simple properties
@@ -63,9 +65,9 @@ public class DescriptorParserTest
     static private void assertSourceIsFile(String msg, String relative_file, Source src)
             throws URISyntaxException
     {
-        File f = new File(PKG_DIR + relative_file);
+        Path f = Paths.get(PKG_DIR + relative_file);
         URI uri = new URI(src.getSystemId());
-        assertEquals(msg, f.getAbsolutePath(), new File(uri).getAbsolutePath());
+        assertEquals(msg, f.toAbsolutePath(), Paths.get(uri).toAbsolutePath());
     }
 
     static private final String PKG_DIR = "test/repos/simple/hello-1.1.1/";

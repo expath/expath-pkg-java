@@ -10,10 +10,6 @@
 
 package org.expath.pkg.repo;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -99,11 +95,11 @@ public class Repository
             dir = System.getenv("EXPATH_REPO");
         }
         if ( dir != null ) {
-            File f = new File(dir);
-            if ( ! f.exists() ) {
+            Path f = Paths.get(dir);
+            if ( ! Files.exists(f) ) {
                 throw new PackageException("Repo directory does not exist: " + dir);
             }
-            if ( ! f.isDirectory() ) {
+            if ( ! Files.isDirectory(f) ) {
                 throw new PackageException("Repo is not a directory: " + dir);
             }
             try {
@@ -163,29 +159,33 @@ public class Repository
      *
      * TODO: Must be delegated to the storage!
      */
-    public static Repository createRepository(File dir)
+    public static Repository createRepository(Path dir)
             throws PackageException
     {
-        if ( dir.exists() ) {
+        if ( Files.exists(dir) ) {
             // must be a dir and empty, or that's an error
-            if ( ! dir.isDirectory() || dir.list() == null ) {
+            if ( ! Files.isDirectory(dir) ) {
                 throw new PackageException("File exists and is not a directory (" + dir + ")");
             }
-            if ( dir.list().length > 0 ) {
+            if ( !FileHelper.isEmpty(dir) ) {
                 throw new PackageException("Directory exists and is not empty (" + dir + ")");
             }
             // TODO: Add a force option to delete the dir if it exists and is
             // not empty?
         }
         else {
-            if ( ! dir.mkdir() ) {
-                throw new PackageException("Error creating the directory (" + dir + ")");
+            try {
+                Files.createDirectories(dir);
+            } catch (final IOException e) {
+                throw new PackageException("Error creating the directory (" + dir + ")", e);
             }
         }
         // here, we know 'dir' is a directory and is empty...
-        File priv_dir = new File(dir, ".expath-pkg/");
-        if ( ! priv_dir.mkdir() ) {
-            throw new PackageException("Error creating the private directory (" + priv_dir + ")");
+        Path priv_dir = dir.resolve(".expath-pkg");
+        try {
+            Files.createDirectories(priv_dir);
+        } catch (final IOException e) {
+            throw new PackageException("Error creating the private directory (" + priv_dir + ")", e);
         }
         return new Repository(new FileSystemStorage(dir));
     }
@@ -270,12 +270,12 @@ public class Repository
         myStorage.beforeInstall(force, interact);
 
         // the temporary dir, to unzip the package
-        File tmp_dir = myStorage.makeTempDir("install");
+        Path tmp_dir = myStorage.makeTempDir("install");
 
         // unzip in the package in destination dir
         try {
             ZipHelper zip = new ZipHelper(xar_file);
-            zip.unzip(tmp_dir.toPath());
+            zip.unzip(tmp_dir);
         }
         catch ( IOException ex ) {
             throw new PackageException("Error unziping the package", ex);
@@ -283,11 +283,11 @@ public class Repository
         interact.logInfo("Package unziped to " + tmp_dir);
 
         // parse the package
-        File desc_f = new File(tmp_dir, "expath-pkg.xml");
-        if ( ! desc_f.exists() ) {
+        Path desc_f = tmp_dir.resolve("expath-pkg.xml");
+        if ( ! Files.exists(desc_f) ) {
             throw new PackageException("Package descriptor does NOT exist in: " + tmp_dir);
         }
-        Source desc = new StreamSource(desc_f);
+        Source desc = new StreamSource(desc_f.toFile());
         // parse the descriptor
         DescriptorParser parser = new DescriptorParser();
         Package pkg = parser.parse(desc, null, myStorage, this);

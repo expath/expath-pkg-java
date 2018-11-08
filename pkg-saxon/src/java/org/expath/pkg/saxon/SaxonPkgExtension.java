@@ -233,7 +233,7 @@ public class SaxonPkgExtension
         }
         // if the classpath does not exist, we must use a FileSystemResolver
         FileSystemResolver res = getFileSystemResolver(pkg);
-        File classpath = res.resolveResourceAsFile(CLASSPATH_FILE);
+        File classpath = res.resolveResourceAsFile(CLASSPATH_FILE).toFile();
         // check [pkg_dir]/.saxon/
         File saxon = classpath.getParentFile();
         if ( saxon.exists() ) {

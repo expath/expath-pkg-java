@@ -9,16 +9,9 @@
 
 package org.expath.pkg.repo.tools;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -33,7 +26,7 @@ import org.expath.pkg.repo.PackageException;
 public class PackagesTxtFile
         extends UpdatableFile
 {
-    public PackagesTxtFile(File file)
+    public PackagesTxtFile(Path file)
             throws PackageException
     {
         super(file);
@@ -44,31 +37,31 @@ public class PackagesTxtFile
     {
         String pkg_name = pkg.getName();
         String pkg_version = pkg.getVersion();
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(myFile));
-            StringWriter buffer = new StringWriter();
-            String line;
-            while ( (line = in.readLine()) != null ) {
-                // ignore "white" lines
-                if ( WHITE_LINE_RE.matcher(line).matches() ) {
-                    continue;
-                }
-                int pos = line.indexOf(' ');
-                String dir = line.substring(0, pos);
-                ++pos;
-                int pos2 = line.indexOf(' ', pos);
-                String name = line.substring(pos, pos2);
-                pos = pos2 + 1;
-                pos2 = line.length();
-                String version = line.substring(pos, pos2);
-                // we don't write the line if either the dir is the same, or if
-                // both the name and the version are the same
-                if ( ! dir.equals(pkg_dir) && ! ( name.equals(pkg_name) && version.equals(pkg_version) ) ) {
-                    buffer.write(line);
-                    buffer.write("\n");
+        try (final StringWriter buffer = new StringWriter()) {
+            try (final BufferedReader in = Files.newBufferedReader(myFile)) {
+                String line;
+                while ((line = in.readLine()) != null) {
+                    // ignore "white" lines
+                    if (WHITE_LINE_RE.matcher(line).matches()) {
+                        continue;
+                    }
+                    int pos = line.indexOf(' ');
+                    String dir = line.substring(0, pos);
+                    ++pos;
+                    int pos2 = line.indexOf(' ', pos);
+                    String name = line.substring(pos, pos2);
+                    pos = pos2 + 1;
+                    pos2 = line.length();
+                    String version = line.substring(pos, pos2);
+                    // we don't write the line if either the dir is the same, or if
+                    // both the name and the version are the same
+                    if (!dir.equals(pkg_dir) && !(name.equals(pkg_name) && version.equals(pkg_version))) {
+                        buffer.write(line);
+                        buffer.write("\n");
+                    }
                 }
             }
-            in.close();
+
             buffer.write(pkg_dir);
             buffer.write(" ");
             buffer.write(pkg_name);
@@ -88,24 +81,24 @@ public class PackagesTxtFile
     public void removePackageByDir(String dir)
             throws PackageException
     {
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(myFile));
-            StringWriter buffer = new StringWriter();
-            String line;
-            while ( (line = in.readLine()) != null ) {
-                // ignore "white" lines
-                if ( WHITE_LINE_RE.matcher(line).matches() ) {
-                    continue;
-                }
-                int pos = line.indexOf(' ');
-                String d = line.substring(0, pos);
-                // we don't write the line of the dir of the package to remove
-                if ( ! d.equals(dir) ) {
-                    buffer.write(line);
-                    buffer.write("\n");
+        try (final StringWriter buffer = new StringWriter()) {
+            try (final BufferedReader in = Files.newBufferedReader(myFile)) {
+
+                String line;
+                while ((line = in.readLine()) != null) {
+                    // ignore "white" lines
+                    if (WHITE_LINE_RE.matcher(line).matches()) {
+                        continue;
+                    }
+                    int pos = line.indexOf(' ');
+                    String d = line.substring(0, pos);
+                    // we don't write the line of the dir of the package to remove
+                    if (!d.equals(dir)) {
+                        buffer.write(line);
+                        buffer.write("\n");
+                    }
                 }
             }
-            in.close();
             update(buffer);
         }
         catch ( FileNotFoundException ex ) {
@@ -124,11 +117,10 @@ public class PackagesTxtFile
     public Set<String> parseDirectories()
             throws PackageException
     {
-        try {
-            InputStream stream = new FileInputStream(myFile);
+        try (final InputStream stream = Files.newInputStream(myFile)) {
             return parseDirectories(stream);
         }
-        catch ( FileNotFoundException ex ) {
+        catch ( IOException ex ) {
             throw new PackageException("File not found: " + myFile, ex);
         }
     }
@@ -142,7 +134,7 @@ public class PackagesTxtFile
     public static Set<String> parseDirectories(InputStream stream)
             throws PackageException
     {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(stream));
             String line;

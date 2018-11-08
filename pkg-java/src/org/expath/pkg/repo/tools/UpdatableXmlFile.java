@@ -9,9 +9,9 @@
 
 package org.expath.pkg.repo.tools;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.file.Path;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -34,7 +34,7 @@ public abstract class UpdatableXmlFile
     /**
      * Create a new instance.
      */
-    public UpdatableXmlFile(File file)
+    public UpdatableXmlFile(Path file)
             throws PackageException
     {
         super(file);
@@ -70,7 +70,7 @@ public abstract class UpdatableXmlFile
             throws PackageException
     {
         try {
-            Source src = new StreamSource(myFile);
+            Source src = new StreamSource(myFile.toFile());
             StringWriter res_out = new StringWriter();
             Result res = new StreamResult(res_out);
             trans.transform(src, res);

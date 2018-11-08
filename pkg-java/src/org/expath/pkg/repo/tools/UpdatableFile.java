@@ -9,14 +9,14 @@
 
 package org.expath.pkg.repo.tools;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.expath.pkg.repo.PackageException;
 
 /**
@@ -26,11 +26,11 @@ import org.expath.pkg.repo.PackageException;
  */
 public abstract class UpdatableFile
 {
-    public UpdatableFile(File file)
+    public UpdatableFile(Path file)
             throws PackageException
     {
         myFile = file;
-        if ( ! myFile.exists() ) {
+        if ( ! Files.exists(myFile) ) {
             topCreateEmpty();
         }
     }
@@ -51,9 +51,7 @@ public abstract class UpdatableFile
     protected void update(StringWriter content)
             throws PackageException
     {
-        OutputStream out = null;
-        try {
-            out = new FileOutputStream(myFile);
+        try (final OutputStream out = Files.newOutputStream(myFile)) {
             byte[] bytes = content.getBuffer().toString().getBytes();
             out.write(bytes);
         }
@@ -63,16 +61,6 @@ public abstract class UpdatableFile
         catch ( IOException ex ) {
             throw new PackageException("Error writing the file: " + myFile, ex);
         }
-        finally {
-            if ( out != null ) {
-                try {
-                    out.close();
-                }
-                catch ( IOException ex ) {
-                    throw new PackageException("Error closing the file: " + myFile, ex);
-                }
-            }
-        }
     }
 
     /**
@@ -81,10 +69,8 @@ public abstract class UpdatableFile
     private void topCreateEmpty()
             throws PackageException
     {
-        try {
-            Writer out = new FileWriter(myFile);
+        try (final Writer out = Files.newBufferedWriter(myFile)) {
             createEmpty(out);
-            out.close();
         }
         catch ( FileNotFoundException ex ) {
             throw new PackageException("Impossible to create the packages text list: " + myFile, ex);
@@ -95,7 +81,7 @@ public abstract class UpdatableFile
     }
 
     /** The actual file object. */
-    protected File myFile;
+    protected Path myFile;
 }
 
 

@@ -11,16 +11,14 @@ package org.expath.pkg.repo;
 
 import org.expath.pkg.repo.tools.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Centralize some file-related utilities.
@@ -35,18 +33,19 @@ public class FileHelper
      * Throw an error if the directory already exists and is not actually a
      * directory, or if there is an error creating it.
      */
-    public static void ensureDir(File dir)
+    public static void ensureDir(Path dir)
             throws PackageException
     {
         // if it does not exist, create it
-        if ( ! dir.exists() ) {
-            boolean res = dir.mkdir();
-            if ( ! res ) {
-                throw new PackageException("Error creating the directory: " + dir);
+        if ( ! Files.exists(dir) ) {
+            try {
+                Files.createDirectories(dir);
+            } catch (final IOException e) {
+                throw new PackageException("Error creating the directory: " + dir, e);
             }
         }
         // but if it exists and is not a dir, that's an error
-        else if ( ! dir.isDirectory() ) {
+        else if ( ! Files.isDirectory(dir) ) {
             throw new PackageException("The directory is not a directory: " + dir);
         }
     }
@@ -57,85 +56,106 @@ public class FileHelper
      * The new directory is empty, and its name is based on {@code prefix},
      * and on the current date after the prefix.
      */
-    public static File makeTempDir(String prefix, File parent)
+    public static Path makeTempDir(final String prefix, final Path parent)
             throws PackageException
     {
         Date now = new Date();
         SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
         String today = fmt.format(now);
-        File tmp;
         try {
-            tmp = File.createTempFile(prefix + "-" + today + "-", ".d", parent);
+            return Files.createTempDirectory(parent, prefix + "-" + today + "-");
         }
         catch ( IOException ex ) {
             throw new PackageException("Error creating a temporary file", ex);
         }
-        if ( ! tmp.delete() ) {
-            throw new PackageException("Error removing the temporary file: " + tmp);
-        }
-        if ( ! tmp.mkdir() ) {
-            throw new PackageException("Error creating the temporary dir: " + tmp);
-        }
-        return tmp;
     }
 
-    public static void renameTmpDir(File from, File to)
+    public static void renameTmpDir(Path from, Path to)
             throws PackageException
     {
-        boolean failed = ! from.renameTo(to);
-        // if renaming failed and we're not on Windows, that's an error
-        // if renaming failed and we're on Windows, we try several things, as
-        // this can be related to stpid Windows locking handling...
-        if ( failed && ! System.getProperty("os.name").startsWith("Windows") ) {
-            throw new PackageException("Renaming '" + from + "' to '" + to + "' failed");
-        }
-        // if the renaming fails, max. 5 times...
-        for ( int i = 0; failed && i < 5; ++ i ) {
-            // call the garbage collector
-            System.gc();
-            // and try again
-            failed = ! from.renameTo(to);
-        }
-        // if that was not enough and renaming still failed after 5 attempts
-        if ( failed ) {
-            // then try to copy the whole thing
-            copyDir(from, to);
-            boolean res = deleteQuietly(from.toPath());
+        try {
+            Files.move(from, to);
+        } catch (final IOException e) {
+            // if renaming failed and we're not on Windows, that's an error
+            // if renaming failed and we're on Windows, we try several things, as
+            // this can be related to tricky Windows locking handling...
+            if (!System.getProperty("os.name").startsWith("Windows") ) {
+                throw new PackageException("Renaming '" + from + "' to '" + to + "' failed", e);
+            }
+
+            // windows - then try to copy the whole thing
+            try {
+                copy(from, to);
+            } catch (final IOException ioe) {
+                throw new PackageException("Copying '" + from + "' to '" + to + "' failed", ioe);
+            }
+
+            boolean res = deleteQuietly(from);
             if ( ! res ) {
                 System.err.println("Error deleting dir: " + from);
             }
         }
     }
 
-    private static void copyDir(File from, File to)
-            throws PackageException
-    {
-        File[] files = from.listFiles();
-        if ( files == null ) {  // null if security restricted
-            throw new PackageException("Failed to list contents of " + from);
-        }
-        if ( to.exists() ) {
-            throw new PackageException("Destination '" + to + "' exists");
-        }
-        if ( ! to.mkdirs() ) {
-            throw new PackageException("Destination '" + to + "' directory cannot be created");
-        }
-        if ( ! to.canWrite() ) {
-            throw new PackageException("Destination '" + to + "' cannot be written to");
-        }
-        for ( File file : files ) {
-            File copied = new File(to, file.getName());
-            if ( file.isDirectory() ) {
-                copyDir(file, copied);
+    /**
+     * Copies a path within the filesystem
+     *
+     * If the path is a directory its contents
+     * will be recursively copied.
+     *
+     * Note that copying of a directory is not an atomic-operation
+     * and so if an error occurs during copying, some of the directories
+     * descendants may have already been copied.
+     *
+     * @param source the source file or directory
+     * @param destination the destination file or directory
+     *
+     * @throws IOException if an error occurs whilst copying a file or directory
+     */
+    public static void copy(final Path source, final Path destination) throws IOException {
+        if (!Files.isDirectory(source)) {
+            Files.copy(source, destination);
+        } else {
+            if (Files.exists(destination) && !Files.isDirectory(destination)) {
+                throw new IOException("Cannot copy a directory to a file");
             }
-            else {
-                try {
-                    Files.copy(file.toPath(), copied.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-                catch ( IOException ex ) {
-                    throw new PackageException("Error copying '" + file + "' to '" + copied + "'", ex);
-                }
-            }
+            Files.walkFileTree(source, copyDirVisitor(source, destination));
+        }
+    }
+
+    private final static SimpleFileVisitor<Path> copyDirVisitor(final Path source, final Path destination) throws IOException {
+        if (!Files.isDirectory(source)) {
+            throw new IOException("source must be a directory");
+        }
+        if (!Files.isDirectory(destination)) {
+            throw new IOException("destination must be a directory");
+        }
+        return new CopyDirVisitor(source, destination);
+    }
+
+    private static class CopyDirVisitor extends SimpleFileVisitor<Path> {
+        private final Path source;
+        private final Path destination;
+
+        public CopyDirVisitor(final Path source, final Path destination) {
+            this.source = source;
+            this.destination = destination;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+            final Path relSourceDir = source.relativize(dir);
+            final Path targetDir = destination.resolve(relSourceDir);
+            Files.createDirectories(targetDir);
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+            final Path relSourceFile = source.relativize(file);
+            final Path targetFile = destination.resolve(relSourceFile);
+            Files.copy(file, targetFile);
+            return FileVisitResult.CONTINUE;
         }
     }
 
@@ -158,26 +178,7 @@ public class FileHelper
     private static class DeleteDirVisitor extends SimpleFileVisitor<Path> {
         @Override
         public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-            try {
-                Files.deleteIfExists(file);
-            } catch (IOException e) {
-                System.gc();
-                try {
-                    Thread.sleep(100);
-                } catch ( InterruptedException ex ) {
-                    // no problem
-                }
-                try {
-                    Files.deleteIfExists(file);
-                } catch (IOException e1) {
-                    LOG.info("Failed to delete file " + file.toString());
-                }
-            }
-            return FileVisitResult.CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+            Files.deleteIfExists(file);
             return FileVisitResult.CONTINUE;
         }
 
@@ -187,22 +188,29 @@ public class FileHelper
                 throw exc;
             }
 
-            try {
-                Files.deleteIfExists(dir);
-            } catch (IOException e) {
-                System.gc();
-                try {
-                    Thread.sleep(100);
-                } catch ( InterruptedException ex ) {
-                    // no problem
-                }
-                try {
-                    Files.deleteIfExists(dir);
-                } catch (IOException e1) {
-                    LOG.info("Failed to delete directory " + dir.toString());
-                }
-            }
+            Files.deleteIfExists(dir);
             return FileVisitResult.CONTINUE;
+        }
+    }
+
+    /**
+     * A list of the entries in the directory. The listing is not recursive.
+     *
+     * @param directory The directory to list the entries for
+     *
+     * @return The list of entries
+     */
+    public static List<Path> list(final Path directory) throws IOException {
+        try(final Stream<Path> entries = Files.list(directory)) {
+            return entries.collect(Collectors.toList());
+        }
+    }
+
+    public static boolean isEmpty(final Path directory) {
+        try(final Stream<Path> entries = Files.list(directory)) {
+            return !entries.findFirst().isPresent();
+        } catch (final IOException e) {
+            return true;
         }
     }
 

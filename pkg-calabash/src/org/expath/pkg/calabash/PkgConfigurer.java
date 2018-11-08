@@ -51,7 +51,7 @@ public class PkgConfigurer
         }
         LOG.info("Initialize EXPath Packaging with: {0}", repo_value);
         try {
-            Storage storage = new FileSystemStorage(new File(repo_value));
+            Storage storage = new FileSystemStorage(new File(repo_value).toPath());
             myRepo = new Repository(storage);
         }
         catch ( PackageException ex ) {

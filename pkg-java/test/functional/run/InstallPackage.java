@@ -10,10 +10,8 @@
 
 package functional.run;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -42,37 +40,31 @@ public class InstallPackage
             throws Exception
     {
         // the SUT
-        File       repo_dir = new File(FunctionalTest.TMP_REPO_DIR);
+        Path       repo_dir = Paths.get(FunctionalTest.TMP_REPO_DIR);
         Storage    storage  = new FileSystemStorage(repo_dir);
         Repository repo     = new Repository(storage);
         Path       pkg      = Paths.get(xar);
         // do it
         repo.installPackage(pkg, true, new FakeInteract());
         // .expath-pkg/packages.txt
-        File packages_txt = new File(repo_dir, ".expath-pkg/packages.txt");
-        assertTrue("the file .expath-pkg/packages.txt exist", packages_txt.exists());
+        Path expathPkgDir = repo_dir.resolve(".expath-pkg");
+        Path packages_txt = expathPkgDir.resolve("packages.txt");
+        assertTrue("the file .expath-pkg/packages.txt exist", Files.exists(packages_txt));
         assertEquals("the file .expath-pkg/packages.txt content", txt_content, readFile(packages_txt));
         // .expath-pkg/packages.xml
-        File packages_xml = new File(repo_dir, ".expath-pkg/packages.xml");
-        assertTrue("the file .expath-pkg/packages.xml exist", packages_xml.exists());
+        Path packages_xml = expathPkgDir.resolve("packages.xml");
+        assertTrue("the file .expath-pkg/packages.xml exist", Files.exists(packages_xml));
         assertEquals("the file .expath-pkg/packages.xml content", xml_content, readFile(packages_xml));
         // content dir
-        File c_dir = new File(repo_dir, content_dir);
-        assertTrue("the content dir exist", c_dir.exists());
+        Path c_dir = repo_dir.resolve(content_dir);
+        assertTrue("the content dir exist", Files.exists(c_dir));
         // TODO: Write more assertions...
     }
 
-    private String readFile(File f)
+    private String readFile(Path f)
             throws IOException
     {
-        BufferedReader reader = new BufferedReader(new FileReader(f));
-        StringBuilder buffer = new StringBuilder();
-        String s;
-        while ( (s = reader.readLine()) != null ) {
-            buffer.append(s);
-            buffer.append('\n');
-        }
-        return buffer.toString();
+        return new String(Files.readAllBytes(f));
     }
 
     private static final String PACKAGES_TXT_CONTENT_OLD =

@@ -9,7 +9,7 @@
 
 package org.expath.pkg.repo;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collection;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ public class RepositoryTest
     public void testConstructor()
             throws Exception
     {
-        Storage storage = new FileSystemStorage(new File("test/repos/simple"));
+        Storage storage = new FileSystemStorage(Paths.get("test/repos/simple"));
         Repository sut = new Repository(storage);
         Collection<Packages> packages_list = sut.listPackages();
         assertEquals("number of packages", 1, packages_list.size());

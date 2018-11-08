@@ -9,8 +9,13 @@
 
 package functional.run;
 
-import java.io.File;
+import org.expath.pkg.repo.FileHelper;
 import org.junit.Test;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static org.junit.Assert.fail;
 
 /**
@@ -29,43 +34,18 @@ public class FunctionalTest
             throws Throwable
     {
         // Initialize a new temporary repo.
-        File repo_dir = new File(TMP_REPO_DIR);
-        if ( repo_dir.exists() ) {
+        Path repo_dir = Paths.get(TMP_REPO_DIR);
+        if ( Files.exists(repo_dir) ) {
             fail("The directory exists: " + TMP_REPO_DIR);
         }
-        if ( ! repo_dir.mkdirs() ) {
-            fail("Error creating the directory: " + TMP_REPO_DIR);
-        }
+        Files.createDirectories(repo_dir);
 
         // Run the actual tests...
         InstallPackage test = new InstallPackage();
         test.testInstall();
 
         // Tear down the temporary repo.
-        recursiveDelete(repo_dir);
-    }
-
-
-    static private void recursiveDelete(File file)
-            throws InterruptedException
-    {
-        if ( file.isDirectory() ) {
-            for ( File child : file.listFiles() ) {
-                recursiveDelete(child);
-            }
-        }
-        if ( ! file.delete() ) {
-            // on Windows, there can be race condition, leading to an error when
-            // trying to delete the files, because the repository object still
-            // holds a reference to the private files like .expath-pkg/packages.xml,
-            // and Windows does not permit to delete a file open by an application
-            System.err.println("Deleting the file/dir failed, collect garbage and sleep 1 sec: " + file);
-            System.gc();
-            Thread.sleep(1000);
-            if ( ! file.delete() ) {
-                fail("Error deleting the file/dir: " + file);
-            }
-        }
+        FileHelper.deleteQuietly(repo_dir);
     }
 }
 

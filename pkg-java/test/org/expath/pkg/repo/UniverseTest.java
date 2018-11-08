@@ -11,8 +11,9 @@ package org.expath.pkg.repo;
 
 import java.io.IOException;
 import java.net.URI;
-import java.io.File;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import org.junit.Test;
@@ -26,35 +27,35 @@ import static org.junit.Assert.*;
  */
 public class UniverseTest
 {
-    private File pkgComponentFile(String repo, String lib, String version, String component)
+    private Path pkgComponentFile(String repo, String lib, String version, String component)
     {
         System.err.println("test/repos/" + repo + "/" + lib + "-" + version + "/" + lib + "/" + component);
-        return new File("test/repos/" + repo + "/" + lib + "-" + version + "/" + lib + "/" + component);
+        return Paths.get("test/repos/" + repo + "/" + lib + "-" + version + "/" + lib + "/" + component);
     }
 
-    private File sourceFile(Source src)
+    private Path sourceFile(Source src)
             throws URISyntaxException
     {
         assertNotNull(src);
         String sysid = src.getSystemId();
         URI uri = new URI(sysid);
-        return new File(uri);
+        return Paths.get(uri);
     }
 
     private void assertComponent(String repo, String lib, String version, String component, Source src)
             throws URISyntaxException, IOException
     {
-        File expected = pkgComponentFile(repo, lib, version, component);
-        File actual   = sourceFile(src);
-        String exp_path = expected.getCanonicalPath();
-        String act_path = actual.getCanonicalPath();
+        Path expected = pkgComponentFile(repo, lib, version, component);
+        Path actual   = sourceFile(src);
+        String exp_path = expected.toFile().getCanonicalPath();
+        String act_path = actual.toFile().getCanonicalPath();
         assertEquals(exp_path, act_path);
     }
 
     private Repository getRepository(String repo)
             throws PackageException
     {
-        File repo_dir = new File("test/repos/" + repo);
+        Path repo_dir = Paths.get("test/repos/" + repo);
         Storage storage = new FileSystemStorage(repo_dir);
         return new Repository(storage);
     }

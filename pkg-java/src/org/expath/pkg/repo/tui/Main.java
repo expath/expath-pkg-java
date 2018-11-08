@@ -10,9 +10,10 @@
 
 package org.expath.pkg.repo.tui;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.xml.transform.Source;
 import org.expath.pkg.repo.Package;
 import org.expath.pkg.repo.PackageException;
@@ -202,7 +203,7 @@ public class Main
             Repository repo = requireRepo();
             URI uri = getURI(args[consumed]);
             if ( uri == null ) {
-                File f = new File(args[consumed]);
+                Path f = Paths.get(args[consumed]);
                 repo.installPackage(f, force, interact);
             }
             else {
@@ -264,7 +265,7 @@ public class Main
     private void doCreate(String[] args, int consumed)
     {
         checkParams("Create", args, consumed, "repository directory name");
-        File repo_dir = new File(args[consumed]);
+        Path repo_dir = Paths.get(args[consumed]);
         try {
             Repository.createRepository(repo_dir);
         }
