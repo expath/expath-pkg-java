@@ -220,7 +220,7 @@ public class RunCalabash
             throws PackageException
     {
         File dir = new File(REPO);
-        Storage storage = new FileSystemStorage(dir);
+        Storage storage = new FileSystemStorage(dir.toPath());
         Repository repo = new Repository(storage);
         return new PkgConfigurer(runtime, repo);
     }

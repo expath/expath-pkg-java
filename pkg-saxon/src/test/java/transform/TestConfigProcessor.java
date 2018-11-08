@@ -62,7 +62,7 @@ public class TestConfigProcessor
     public TestConfigProcessor()
             throws PackageException
     {
-        Storage storage = new FileSystemStorage(new File("test/java/transform/repo"));
+        Storage storage = new FileSystemStorage(new File("test/java/transform/repo").toPath());
         REPO = new SaxonRepository(storage);
     }
 
