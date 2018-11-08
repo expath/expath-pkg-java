@@ -1,4 +1,8 @@
+[![Build Status](https://travis-ci.com/eXist-db/expath-pkg-java.png?branch=develop)](https://travis-ci.com/eXist-db/expath-pkg-java)
+
 # EXPath Packaging for Java
+
+**NOTE:** This is a fork and advancement of the code taken from [fgeorges/expath-pkg-java](https://github.com/fgeorges/expath-pkg-java). Unfortunately we were unable to get changes via PR upstreamed, so we have forked the project here.
 
 Implementation of the EXPath [Packaging System](http://expath.org/modules/pkg/)
 for Java, Saxon and Calabash.
