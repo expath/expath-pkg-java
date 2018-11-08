@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.exist-db.thirdparty.org.expath.packaging</groupId>
         <artifactId>pkg-parent</artifactId>
-        <version>1.0</version>
+        <version>1.1-SNAPSHOT</version>
         <relativePath>pkg-parent/pom.xml</relativePath>
     </parent>
 
@@ -20,7 +20,7 @@
         <connection>scm:git:https://github.com/exist-db/expath-pkg-java.git</connection>
         <developerConnection>scm:git:https://github.com/exist-db/expath-pkg-java.git</developerConnection>
         <url>scm:git:https://github.com/exist-db/expath-pkg-java.git</url>
-      <tag>pkg-1.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <modules>
