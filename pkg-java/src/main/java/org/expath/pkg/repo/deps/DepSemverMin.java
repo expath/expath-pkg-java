@@ -22,14 +22,14 @@ class DepSemverMin
     public DepSemverMin(String semver)
             throws PackageException
     {
-        mySemver = new Semver(semver);
+        mySemver = Semver.parse(semver);
     }
 
     @Override
     public boolean isCompatible(String version)
             throws PackageException
     {
-        Semver rhs = new Semver(version);
+        Semver rhs = Semver.parse(version);
         return mySemver.matchesMin(rhs);
     }
 

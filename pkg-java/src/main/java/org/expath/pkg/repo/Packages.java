@@ -105,8 +105,8 @@ public class Packages
     private static boolean lower(Package lhs, Package rhs)
     {
         try {
-            Semver lver = new Semver(lhs.getVersion());
-            Semver rver = new Semver(rhs.getVersion());
+            Semver lver = Semver.parse(lhs.getVersion());
+            Semver rver = Semver.parse(rhs.getVersion());
             return lver.matchesMin(rver);
         }
         catch ( PackageException ex ) {

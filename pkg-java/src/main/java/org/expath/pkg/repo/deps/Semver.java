@@ -1,9 +1,9 @@
 /****************************************************************************/
 /*  File:       Semver.java                                                 */
-/*  Author:     F. Georges - H2O Consulting                                 */
-/*  Date:       2010-11-15                                                  */
+/*  Author:     Adam Retter - Evolved Binary                                */
+/*  Date:       2018-11-09                                                  */
 /*  Tags:                                                                   */
-/*      Copyright (c) 2010 Florent Georges (see end of file.)               */
+/*      Copyright (c) 2018 Adam Retter (see end of file.)                   */
 /* ------------------------------------------------------------------------ */
 
 
@@ -11,216 +11,220 @@ package org.expath.pkg.repo.deps;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.expath.pkg.repo.PackageException;
 
 /**
  * Represents a SemVer template, or a SemVer version number.
  *
- * See http://semver.org/.  A template is like a version number, but it can
- * have less parts.  For instance "2.3" is a valid template, even though it
- * is not a valid version number (because it does not have any patch number).
- * This template matches any version number starting with "2.3", for instance
- * "2.3.0", "2.3.99" and "2.3.4beta5".
- * 
- * SemVer has released a new version of the spec, and the pre-release part
- * (like "pre1" or "beta5") must now be preceded by a slash (it was forbidden
- * before...)  TODO: Change this class to accept both kinds.  And adapt the
- * Packaging spec too.
- *
- * @author Florent Georges
+ * @author Adam Retter
  */
-public class Semver
-{
-    public Semver(String semver)
-            throws PackageException
-    {
-        myParts = parse(semver);
-        myString = semver;
+public class Semver implements Comparable<Semver> {
+
+    /**
+     * https://semver.org/
+     * v2.0
+     */
+    private static final Pattern PTN_SEM_VER = Pattern.compile("([0-9]+)(\\.[0-9]+)?(\\.[0-9]+)?(-[1-9A-Za-z][0-9A-Za-z-]*(?:\\.[1-9A-Za-z][0-9A-Za-z-]*)*)?(\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?");
+
+    private final int majorVersion;
+    private final Integer minorVersion;
+    private final Integer patchVersion;
+    private final String preReleaseVersion;
+    private final String buildMetadata;
+
+    public Semver(final int majorVersion, final Integer minorVersion,
+            final Integer patchVersion, final String preReleaseVersion,
+            final String buildMetadata) {
+        this.majorVersion = majorVersion;
+        this.minorVersion = minorVersion;
+        this.patchVersion = patchVersion;
+        this.preReleaseVersion = preReleaseVersion;
+        this.buildMetadata = buildMetadata;
+    }
+
+    public static Semver parse(final String semver) throws PackageException {
+        final Matcher matcher = PTN_SEM_VER.matcher(semver);
+        if (!matcher.matches()) {
+            parseError(semver, "Does not match EXPath SemVer Regex");
+        }
+
+        final int majorVersion = Integer.parseInt(matcher.group(1));
+        Integer minorVersion = null;
+        Integer patchVersion = null;
+        String preReleaseVersion = null;
+        String buildMetadata = null;
+
+        for (int i = 2; i <= matcher.groupCount(); i++) {
+            final String group = matcher.group(i);
+            if (group != null) {
+                switch (group.charAt(0)) {
+                    case '.':
+                        if (minorVersion == null) {
+                            minorVersion = Integer.parseInt(group.substring(1));
+                        } else {
+                            patchVersion = Integer.parseInt(group.substring(1));
+                        }
+                        break;
+
+                    case '-':
+                        preReleaseVersion = group.substring(1);
+                        break;
+
+                    case '+':
+                        buildMetadata = group.substring(1);
+                        break;
+
+                    default:
+                        parseError(semver, "Illegal state");
+                }
+            }
+        }
+
+//        if (minorVersion == null) {
+//            minorVersion = 0;
+//        }
+//
+//        if (patchVersion == null) {
+//            patchVersion = 0;
+//        }
+
+        return new Semver(
+                majorVersion,
+                minorVersion,
+                patchVersion,
+                preReleaseVersion,
+                buildMetadata
+        );
+    }
+
+    public int getMajorVersion() {
+        return majorVersion;
+    }
+
+    public Integer getMinorVersion() {
+        return minorVersion;
+    }
+
+    public Integer getPatchVersion() {
+        return patchVersion;
+    }
+
+    public String getPreReleaseVersion() {
+        return preReleaseVersion;
+    }
+
+    public String getBuildMetadata() {
+        return buildMetadata;
     }
 
     /**
      * Does {@code rhs} (a SemVer version) match this SemVer template?
      */
-    public boolean matches(Semver rhs)
-            throws PackageException
-    {
-        int this_len = myParts.length;
-        int rhs_len = rhs.myParts.length;
-        // TODO: We should probably relax the rule to accept only two components
-        // in a semver (two components version numbers are very common, and we
-        // should be able to treat them as semvers).  Maybe emit a warning or
-        // even an error based on a config option.
-        if ( rhs_len < 3 ) {
-            throw new PackageException("RHS is not a SemVer version: '" + rhs.myString + "'");
-        }
-        if ( rhs_len < this_len ) {
-            // if the template has a special string, but the RHS has not,
-            // then it does not match
-            return false;
-        }
-        for ( int i = 0; i < this_len; ++i ) {
-            String p1 = myParts[i];
-            String p2 = rhs.myParts[i];
-            if ( ! p1.equals(p2) ) {
-                // if one part is not equal, then it does not match
-                return false;
-            }
-        }
-        // if all parts are equal, then the version matches the template
-        return true;
+    public boolean matches(final Semver rhs)
+            throws PackageException {
+
+        return compareTo(rhs) == 0;
     }
 
     /**
      * Does {@code rhs} (a SemVer version) match this SemVer template as a minimum?
-     * 
+     * <p>
      * Return true if {@code rhs} is equal or above this template.
      */
-    public boolean matchesMin(Semver rhs)
-            throws PackageException
-    {
-        int this_len = myParts.length;
-        int rhs_len = rhs.myParts.length;
-        int max = this_len == 4 ? 3 : this_len;
-        for ( int i = 0; i < max; ++i ) {
-            String p1 = myParts[i];
-            String p2 = rhs.myParts[i];
-            int cmp = compareNumbers(p1, p2);
-            if ( cmp < 0 ) {
-                return true;
-            }
-            if ( cmp > 0 ) {
-                return false;
-            }
-        }
-        if ( this_len < 3 ) { // template is only 1 or 2 parts-long
-            return true;
-        }
-        if ( this_len == 4 ) { // template has a special part
-            if ( rhs_len == 4 ) {
-                String p1 = myParts[3];
-                String p2 = rhs.myParts[3];
-                return p1.compareTo(p2) <= 0;
-            }
-            return true; // 1.0.0alpha is before 1.0.0
-        }
-        if ( rhs_len == 4 ) {
-            return false;
-        }
-        return true; // perfect 3 parts equality
+    public boolean matchesMin(final Semver rhs)
+            throws PackageException {
+        return compareTo(rhs) <= 0;
     }
 
     /**
      * Does {@code rhs} (a SemVer version) match this SemVer template as a maximum?
-     *
+     * <p>
      * Return true if {@code rhs} is equal or below this template.
      */
-    public boolean matchesMax(Semver rhs)
-            throws PackageException
-    {
-        int this_len = myParts.length;
-        int rhs_len = rhs.myParts.length;
-        int max = this_len == 4 ? 3 : this_len;
-        for ( int i = 0; i < max; ++i ) {
-            String p1 = myParts[i];
-            String p2 = rhs.myParts[i];
-            int cmp = compareNumbers(p1, p2);
-            if ( cmp < 0 ) {
-                return false;
-            }
-            if ( cmp > 0 ) {
-                return true;
-            }
-        }
-        if ( this_len < 3 ) { // template is only 1 or 2 parts-long
-            return true;
-        }
-        if ( this_len == 4 ) { // template has a special part
-            if ( rhs_len == 4 ) {
-                String p1 = myParts[3];
-                String p2 = rhs.myParts[3];
-                return p1.compareTo(p2) >= 0;
-            }
-            return false; // 1.0.0alpha is before 1.0.0
-        }
-        if ( rhs_len == 4 ) {
-            return true;
-        }
-        return true; // perfect 3 parts equality
+    public boolean matchesMax(final Semver rhs)
+            throws PackageException {
+        return compareTo(rhs) >= 0;
     }
 
-    private static int compareNumbers(String lhs, String rhs)
-    {
-        int lhs_len = lhs.length();
-        int rhs_len = rhs.length();
-        if ( lhs_len < rhs_len ) {
+    @Override
+    public int compareTo(final Semver other) {
+        final int majorDiff = this.majorVersion - other.majorVersion;
+        if (majorDiff != 0) {
+            return majorDiff * 1000;
+        }
+
+        if (this.minorVersion != null) {
+            final int minorDiff = this.minorVersion - other.minorVersion;
+            if (minorDiff != 0) {
+                return minorDiff * 100;
+            }
+        } else {
+            return 0;
+        }
+
+        if (this.patchVersion != null) {
+            final int patchDiff = this.patchVersion - other.patchVersion;
+            if (patchDiff != 0) {
+                return patchDiff * 10;
+            }
+        } else {
+            return 0;
+        }
+
+        if (this.preReleaseVersion == null && other.preReleaseVersion == null) {
+            return 0;
+        } else if (this.preReleaseVersion == null) {
+            return 1;
+        } else if (other.preReleaseVersion == null) {
             return -1;
         }
-        if ( lhs_len > rhs_len ) {
-            return 1;
+
+        // both have preReleaseVersion, need to compare them
+        final String[] preReleaseIdentfiers = this.preReleaseVersion.split("\\.");
+        final String[] otherPreReleaseIdentfiers = other.preReleaseVersion.split("\\.");
+        for(int i = 0; i < Math.min(preReleaseIdentfiers.length, otherPreReleaseIdentfiers.length); i++) {
+            final String preReleaseIdentfier = preReleaseIdentfiers[i];
+            final String otherPreReleaseIdentfier = otherPreReleaseIdentfiers[i];
+            final boolean preReleaseIdentfierIsNum = isNumeric(preReleaseIdentfier);
+            final boolean otherPreReleaseIdentfierIsNum = isNumeric(otherPreReleaseIdentfier);
+
+            if (preReleaseIdentfierIsNum && otherPreReleaseIdentfierIsNum) {
+                // both are numeric
+                final int preReleaseIdentifierDiff = Integer.parseInt(preReleaseIdentfier) - Integer.parseInt(otherPreReleaseIdentfier);
+                if (preReleaseIdentifierDiff != 0) {
+                    return preReleaseIdentifierDiff;
+                }
+            } else if (preReleaseIdentfierIsNum) {
+                return -1;
+            } else if (otherPreReleaseIdentfierIsNum) {
+                return 1;
+            } else {
+                // both are alphanumeric
+                final int preReleaseIdentifierDiff = preReleaseIdentfier.compareTo(otherPreReleaseIdentfier);
+                if (preReleaseIdentifierDiff != 0) {
+                    return preReleaseIdentifierDiff;
+                }
+            }
         }
-        return lhs.compareTo(rhs);
+
+        return preReleaseIdentfiers.length - otherPreReleaseIdentfiers.length;
     }
 
-    /**
-     * Parse the different parts of a SemVer template.
-     *
-     * Has the package visibility, in order to be unit-tested.  MUST NOT be
-     * called from the outside!
-     */
-    static String[] parse(String semver)
-            throws PackageException
-    {
-        // TODO: Check the doc of split(): regex or not regex?, etc.
-        String[] parts = semver.split("\\.");
-        int len = parts.length;
-        if ( len > 3 ) {
-            parseError(semver, "too much version parts");
+    private static boolean isNumeric(final String string) {
+        for (int i = 0; i < string.length(); i++) {
+            final char c = string.charAt(i);
+            if ('0' < c || c > '9') {
+                return false;
+            }
         }
-        if ( len == 0 ) {
-            parseError(semver, "no version parts");
-        }
-        if ( ! NUMBER_RE.matcher(parts[0]).matches() ) {
-            parseError(semver, "first part is not a number");
-        }
-        if ( len == 1 ) {
-            return parts;
-        }
-        if ( ! NUMBER_RE.matcher(parts[1]).matches() ) {
-            parseError(semver, "second part is not a number");
-        }
-        if ( len == 2 ) {
-            return parts;
-        }
-        if ( NUMBER_RE.matcher(parts[2]).matches() ) {
-            return parts;
-        }
-        Matcher m = LAST_PART_RE.matcher(parts[2]);
-        if ( m.matches() ) {
-            String[] result = new String[4];
-            result[0] = parts[0];
-            result[1] = parts[1];
-            result[2] = m.group(1); // TODO: Do groups start at 1 ??? (with 0 = whole match)
-            result[3] = m.group(3);
-            return result;
-        }
-        parseError(semver, "third part is invalid");
-        // to make javac happy (it does not detect parseError() always throws an exception)
-        return null;
+        return true;
+     }
+
+    private static void parseError(final String semver, final String msg)
+            throws PackageException {
+        throw new PackageException("Invalid SemVer '" + semver + "': " + msg);
     }
-
-    private static void parseError(String semver, String msg)
-            throws PackageException
-    {
-        throw new PackageException("Invalid SemVer pattern '" + semver + "': " + msg);
-    }
-
-    private static final Pattern NUMBER_RE = Pattern.compile("^([1-9][0-9]*)|0$");
-    // TODO: Check the regex against the SemVer spec...
-    private static final Pattern LAST_PART_RE =
-            Pattern.compile("^(([1-9][0-9]*)|0)([a-zA-Z][-a-zA-Z0-9]*)$");
-
-    private String   myString; // for reporting purposes
-    private String[] myParts;
 }
 
 
@@ -239,7 +243,7 @@ public class Semver
 /*                                                                          */
 /*  The Original Code is: all this file.                                    */
 /*                                                                          */
-/*  The Initial Developer of the Original Code is Florent Georges.          */
+/*  The Initial Developer of the Original Code is Adam Retter Georges.      */
 /*                                                                          */
 /*  Contributor(s): none.                                                   */
 /* ------------------------------------------------------------------------ */
