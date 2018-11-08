@@ -18,13 +18,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.URIResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ModuleURIResolver;
+import org.expath.pkg.repo.*;
 import org.expath.pkg.repo.Package;
-import org.expath.pkg.repo.PackageException;
-import org.expath.pkg.repo.Packages;
-import org.expath.pkg.repo.Repository;
-import org.expath.pkg.repo.Storage;
-import org.expath.pkg.repo.URISpace;
-import org.expath.pkg.repo.UserInteractionStrategy;
 import org.expath.pkg.repo.tools.Logger;
 
 /**
@@ -74,7 +69,7 @@ public class SaxonRepository
     public Package installPackage(File pkg, boolean force, UserInteractionStrategy interact)
             throws PackageException
     {
-        return myParent.installPackage(pkg.toPath(), force, interact);
+        return myParent.installPackage(new XarFileSource(pkg.toPath()), force, interact);
     }
 
     /**

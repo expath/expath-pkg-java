@@ -11,13 +11,11 @@
 package org.expath.pkg.repo;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Enumeration;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * Helper classes providing ZIP file services.
@@ -26,9 +24,9 @@ import java.util.zip.ZipFile;
  */
 class ZipHelper
 {
-    public ZipHelper(Path zip)
+    public ZipHelper(XarSource xarSource)
     {
-        myZip = zip;
+        myXarSource = xarSource;
     }
 
     /**
@@ -42,7 +40,9 @@ class ZipHelper
     {
         Path tmpdir = Files.createTempDirectory("expath-pkg");
         tmpdir.toFile().deleteOnExit();
+
         unzip(tmpdir);
+
         return tmpdir;
     }
 
@@ -62,28 +62,29 @@ class ZipHelper
         } else if ( !Files.isDirectory(dest_dir) ) {
             throw new IOException("Destination is not a directory: " + dest_dir);
         }
+
         // loop over entries
-        ZipFile archive = new ZipFile(myZip.toFile());
-        Enumeration entries = archive.entries();
-        while ( entries.hasMoreElements() ) {
-            ZipEntry entry = (ZipEntry)entries.nextElement();
-            if ( ! entry.isDirectory() ) {
-                // detination file
-                Path dest = dest_dir.resolve(entry.getName());
-                // create parent dir if needed
-                Path parent = dest.getParent();
-                if ( ! Files.exists(parent) ) {
-                    Files.createDirectories(parent);
+        try (final ZipInputStream zis = new ZipInputStream(myXarSource.newInputStream())) {
+            ZipEntry entry = null;
+
+            while ((entry = zis.getNextEntry()) != null) {
+                if ( ! entry.isDirectory() ) {
+                    // destination file
+                    Path dest = dest_dir.resolve(entry.getName());
+                    // create parent dir if needed
+                    Path parent = dest.getParent();
+                    if ( ! Files.exists(parent) ) {
+                        Files.createDirectories(parent);
+                    }
+
+                    // copy the entry to the file
+                    Files.copy(zis, dest, StandardCopyOption.REPLACE_EXISTING);
                 }
-                // copy the entry to the file
-                InputStream in = archive.getInputStream(entry);
-                Files.copy(in, dest, StandardCopyOption.REPLACE_EXISTING);
             }
         }
-        archive.close();
     }
 
-    private Path myZip;
+    private XarSource myXarSource;
 }
 
 

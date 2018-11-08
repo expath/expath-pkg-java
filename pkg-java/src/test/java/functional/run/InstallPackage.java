@@ -15,11 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.expath.pkg.repo.FileSystemStorage;
-import org.expath.pkg.repo.PackageException;
-import org.expath.pkg.repo.Repository;
-import org.expath.pkg.repo.Storage;
-import org.expath.pkg.repo.UserInteractionStrategy;
+import org.expath.pkg.repo.*;
+
 import static org.junit.Assert.*;
 
 /**
@@ -45,7 +42,7 @@ public class InstallPackage
         Repository repo     = new Repository(storage);
         Path       pkg      = Paths.get(xar);
         // do it
-        repo.installPackage(pkg, true, new FakeInteract());
+        repo.installPackage(new XarFileSource(pkg), true, new FakeInteract());
         // .expath-pkg/packages.txt
         Path expathPkgDir = repo_dir.resolve(".expath-pkg");
         Path packages_txt = expathPkgDir.resolve("packages.txt");

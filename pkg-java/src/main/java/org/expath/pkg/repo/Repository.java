@@ -11,11 +11,7 @@
 package org.expath.pkg.repo;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -214,33 +210,8 @@ public class Repository
             throw new PackageException("The storage is read-only, package install not supported");
         }
         // TODO: Must be moved within the storage class (because we are writing on disk)...
-        Path downloaded;
-        try {
-            URLConnection connection = pkg.toURL().openConnection();
-            connection.connect();
-            if ( connection instanceof HttpURLConnection ) {
-                HttpURLConnection hc = (HttpURLConnection) connection;
-                int code = hc.getResponseCode();
-                if ( code == 404 ) {
-                    throw new NotFoundException(pkg);
-                }
-                if ( code < 200 || code >= 300 ) {
-                    String msg = hc.getResponseMessage();
-                    throw new HttpException(pkg, code, msg);
-                }
-            }
-            InputStream instream = connection.getInputStream();
-            downloaded = Files.createTempFile(Paths.get(pkg.getPath()).getFileName().toString() + '-', "-expath-tmp" +
-                    ".xar");
-            Files.copy(instream, downloaded);
-        }
-        catch ( MalformedURLException ex ) {
-            throw new OnlineException(pkg, ex);
-        }
-        catch ( IOException ex ) {
-            throw new OnlineException(pkg, ex);
-        }
-        return installPackage(downloaded, force, interact);
+
+        return installPackage(new XarUriSource(pkg), force, interact);
     }
 
     /**
@@ -248,7 +219,7 @@ public class Repository
      *
      * TODO: In case of exception, the temporary dir is not removed, solve that.
      * 
-     * @param xar_file  The package file (typically a {@code *.xar} or {@code *.xaw} file).
+     * @param xarSource A source for the package file (typically a {@code *.xar} or {@code *.xaw} file).
      * 
      * @param force If force is false, this is an error if the same package has
      * already been installed in the repository.  If it is true, it is first
@@ -260,12 +231,12 @@ public class Repository
      * 
      * @throws PackageException If any error occurs.
      */
-    public Package installPackage(Path xar_file, boolean force, UserInteractionStrategy interact)
+    public Package installPackage(XarSource xarSource, boolean force, UserInteractionStrategy interact)
             throws PackageException
     {
         // preconditions
-        if ( ! Files.exists(xar_file)) {
-            throw new PackageException("Package file does not exist (" + xar_file + ")");
+        if ( ! xarSource.isValid()) {
+            throw new PackageException("Package file does not exist (" + xarSource.getURI() + ")");
         }
         myStorage.beforeInstall(force, interact);
 
@@ -274,7 +245,7 @@ public class Repository
 
         // unzip in the package in destination dir
         try {
-            ZipHelper zip = new ZipHelper(xar_file);
+            ZipHelper zip = new ZipHelper(xarSource);
             zip.unzip(tmp_dir);
         }
         catch ( IOException ex ) {

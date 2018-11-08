@@ -15,13 +15,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.xml.transform.Source;
+
+import org.expath.pkg.repo.*;
 import org.expath.pkg.repo.Package;
-import org.expath.pkg.repo.PackageException;
-import org.expath.pkg.repo.Packages;
-import org.expath.pkg.repo.Repository;
-import org.expath.pkg.repo.URISpace;
-import org.expath.pkg.repo.UserInteractionStrategy;
-import org.expath.pkg.repo.Version;
 
 /**
  * Main class for the Text User Interface repository administration.
@@ -204,7 +200,7 @@ public class Main
             URI uri = getURI(args[consumed]);
             if ( uri == null ) {
                 Path f = Paths.get(args[consumed]);
-                repo.installPackage(f, force, interact);
+                repo.installPackage(new XarFileSource(f), force, interact);
             }
             else {
                 repo.installPackage(uri, force, interact);
