@@ -18,9 +18,9 @@
     <description>The base POM for all EXPath Packaging modules.</description>
 
     <scm>
-        <connection>scm:git:git://github.com/exist-db/expath-pkg-java.git</connection>
-        <developerConnection>scm:git:git://github.com/exist-db/expath-pkg-java.git</developerConnection>
-        <url>http://github.com/exist-db/expath-pkg-java</url>
+        <connection>scm:git:https://github.com/exist-db/expath-pkg-java.git</connection>
+        <developerConnection>scm:git:https://github.com/exist-db/expath-pkg-java.git</developerConnection>
+        <url>https://github.com/exist-db/expath-pkg-java</url>
     </scm>
 
 </project>
