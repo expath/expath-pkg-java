@@ -17,9 +17,9 @@
     <description>Implementation of EXPath Packaging for XML Calabash</description>
 
     <scm>
-        <connection>scm:git:git://github.com/expath/expath-pkg-java.git</connection>
-        <developerConnection>scm:git:git://github.com/expath/expath-pkg-java.git</developerConnection>
-        <url>scm:git:git://github.com/expath/expath-pkg-java.git</url>
+        <connection>scm:git:https://github.com/expath/expath-pkg-java.git</connection>
+        <developerConnection>scm:git:https://github.com/expath/expath-pkg-java.git</developerConnection>
+        <url>scm:git:https://github.com/expath/expath-pkg-java.git</url>
     </scm>
 
     <dependencies>
