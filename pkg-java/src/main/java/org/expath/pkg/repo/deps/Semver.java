@@ -243,7 +243,7 @@ public class Semver implements Comparable<Semver> {
 /*                                                                          */
 /*  The Original Code is: all this file.                                    */
 /*                                                                          */
-/*  The Initial Developer of the Original Code is Adam Retter Georges.      */
+/*  The Initial Developer of the Original Code is Adam Retter.              */
 /*                                                                          */
 /*  Contributor(s): none.                                                   */
 /* ------------------------------------------------------------------------ */
