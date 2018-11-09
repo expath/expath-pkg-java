@@ -1,2 +1,2 @@
-sudo: flase
+sudo: false
 language: java
