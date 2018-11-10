@@ -6,7 +6,7 @@
         <groupId>org.exist-db.thirdparty.org.expath</groupId>
         <artifactId>expath-parent</artifactId>
         <version>1.0</version>
-        <relativePath>../../expath-parent/pom.xml</relativePath>
+        <relativePath/>
     </parent>
 
     <groupId>org.exist-db.thirdparty.org.expath.packaging</groupId>
@@ -23,5 +23,13 @@
         <url>scm:git:https://github.com/exist-db/expath-pkg-java.git</url>
       <tag>HEAD</tag>
   </scm>
+
+  <repositories>
+      <!-- needed for expath-parent -->
+      <repository>
+          <id>exist-db</id>
+          <url>http://repo.evolvedbinary.com/repository/exist-db/</url>
+      </repository>
+  </repositories>
 
 </project>
