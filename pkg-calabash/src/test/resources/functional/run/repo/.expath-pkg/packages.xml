@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<packages xmlns="http://expath.org/ns/repo/packages">
-   <package name="http://fgeorges.org/test/calabash/invoice" dir="invoice-1.0" version="1.0"/>
-   <package name="http://www.example.com/ext" dir="test-ext-saxon-1.0" version="1.0"/>
-</packages>

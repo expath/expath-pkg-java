@@ -26,8 +26,6 @@
     <modules>
         <module>pkg-parent</module>
         <module>pkg-java</module>
-        <module>pkg-saxon</module>
-        <module>pkg-calabash</module>
     </modules>
 
 </project>

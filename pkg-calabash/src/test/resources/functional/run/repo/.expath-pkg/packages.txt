@@ -1,2 +1,0 @@
-invoice-1.0 http://fgeorges.org/test/calabash/invoice 1.0
-test-ext-saxon-1.0 http://www.example.com/ext 1.0

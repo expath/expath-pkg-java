@@ -1,3 +1,0 @@
-hello-1.0 http://example.org/lib/hello 1.0
-new-struct-0.1 http://example.org/lib/new/hello 1.0
-test-ext-saxon-0.1 http://www.example.com/ext 1.0
