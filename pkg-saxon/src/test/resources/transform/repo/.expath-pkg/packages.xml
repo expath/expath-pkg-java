@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<packages xmlns="http://expath.org/ns/repo/packages">
-   <package name="hello-1.0" dir="http://example.org/lib/hello" version="1.0"/>
-   <package name="new-struct-0.1" dir="http://example.org/lib/new/hello" version="1.0"/>
-   <package name="test-ext-saxon-0.1" dir="http://www.example.com/ext" version="1.0"/>
-</packages>
