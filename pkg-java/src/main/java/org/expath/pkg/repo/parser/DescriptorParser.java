@@ -35,49 +35,58 @@ public class DescriptorParser
             throws PackageException
     {
         // parse the pkg descriptor
-        XMLStreamReader parser = XS_HELPER.makeParser(desc);
-        // go to the package element
-        XS_HELPER.ensureDocument(parser);
-        XS_HELPER.ensureNextElement(parser, "package");
-        // check the spec version
-        String spec = XS_HELPER.getAttributeValue(parser, "spec");
-        if ( ! "1.0".equals(spec) ) {
-            throw new PackageException("Spec version is not 1.0: '" + spec + "'");
-        }
-        // get the package attributes
-        String name    = XS_HELPER.getAttributeValue(parser, "name");
-        String abbrev  = XS_HELPER.getAttributeValue(parser, "abbrev");
-        String version = XS_HELPER.getAttributeValue(parser, "version");
-        // TODO: Check the module "dir" exists? (in the storage object)
-        XS_HELPER.ensureNextElement(parser, "title");
-        String title = XS_HELPER.getElementValue(parser);
-        Package pkg = null;
+        XMLStreamReader parser = null;
         try {
-            // the home URI
-            String home = null;
-            parser.next();
-            if ( XS_HELPER.isElement(parser, "home") ) {
-                home = XS_HELPER.getElementValue(parser);
-                parser.next();
+            parser = XS_HELPER.makeParser(desc);
+            // go to the package element
+            XS_HELPER.ensureDocument(parser);
+            XS_HELPER.ensureNextElement(parser, "package");
+            // check the spec version
+            String spec = XS_HELPER.getAttributeValue(parser, "spec");
+            if (!"1.0".equals(spec)) {
+                throw new PackageException("Spec version is not 1.0: '" + spec + "'");
             }
-            // create the package object
-            Storage.PackageResolver resolver = storage.makePackageResolver(rsrc_name, abbrev);
-            pkg = new Package(repo, resolver, name, abbrev, version, title, home);
-            // the dependencies
-            while ( XS_HELPER.isElement(parser, "dependency") ) {
-                handleDependency(parser, pkg);
+            // get the package attributes
+            String name = XS_HELPER.getAttributeValue(parser, "name");
+            String abbrev = XS_HELPER.getAttributeValue(parser, "abbrev");
+            String version = XS_HELPER.getAttributeValue(parser, "version");
+            // TODO: Check the module "dir" exists? (in the storage object)
+            XS_HELPER.ensureNextElement(parser, "title");
+            String title = XS_HELPER.getElementValue(parser);
+            Package pkg = null;
+            try {
+                // the home URI
+                String home = null;
                 parser.next();
+                if (XS_HELPER.isElement(parser, "home")) {
+                    home = XS_HELPER.getElementValue(parser);
+                    parser.next();
+                }
+                // create the package object
+                Storage.PackageResolver resolver = storage.makePackageResolver(rsrc_name, abbrev);
+                pkg = new Package(repo, resolver, name, abbrev, version, title, home);
+                // the dependencies
+                while (XS_HELPER.isElement(parser, "dependency")) {
+                    handleDependency(parser, pkg);
+                    parser.next();
+                }
+                // the components
+                while (parser.getEventType() == XMLStreamConstants.START_ELEMENT) {
+                    handleComponent(parser, pkg);
+                }
+            } catch (XMLStreamException ex) {
+                throw new PackageException("Error parsing the package descriptor", ex);
             }
-            // the components
-            while ( parser.getEventType() == XMLStreamConstants.START_ELEMENT ) {
-                handleComponent(parser, pkg);
+
+            // TODO: Here, we must be on the </package> tag.  Ensure it...
+            return pkg;
+        } finally {
+            try {
+                parser.close();
+            } catch (final XMLStreamException e) {
+                throw new PackageException(e.getMessage(), e);
             }
         }
-        catch ( XMLStreamException ex ) {
-            throw new PackageException("Error parsing the package descriptor", ex);
-        }
-        // TODO: Here, we must be on the </package> tag.  Ensure it...
-        return pkg;
     }
 
     /**
