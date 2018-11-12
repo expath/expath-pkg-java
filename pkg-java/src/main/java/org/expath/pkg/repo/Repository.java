@@ -11,6 +11,7 @@
 package org.expath.pkg.repo;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -254,14 +255,20 @@ public class Repository
         interact.logInfo("Package unziped to " + tmp_dir);
 
         // parse the package
-        Path desc_f = tmp_dir.resolve("expath-pkg.xml");
+        final Path desc_f = tmp_dir.resolve("expath-pkg.xml");
         if ( ! Files.exists(desc_f) ) {
             throw new PackageException("Package descriptor does NOT exist in: " + tmp_dir);
         }
-        Source desc = new StreamSource(desc_f.toFile());
-        // parse the descriptor
-        DescriptorParser parser = new DescriptorParser();
-        Package pkg = parser.parse(desc, null, myStorage, this);
+
+       final  Package pkg;
+        try (final InputStream is = Files.newInputStream(desc_f)) {
+            final Source desc = new StreamSource(is);
+            // parse the descriptor
+            final DescriptorParser parser = new DescriptorParser();
+            pkg = parser.parse(desc, null, myStorage, this);
+        } catch (final IOException e) {
+            throw new PackageException(e.getMessage(), e);
+        }
 
         // is the package already in the repo?
         String name = pkg.getName();
