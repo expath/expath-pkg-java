@@ -50,7 +50,8 @@ public class InstallPackage
         // .expath-pkg/packages.xml
         Path packages_xml = expathPkgDir.resolve("packages.xml");
         assertTrue("the file .expath-pkg/packages.xml exist", Files.exists(packages_xml));
-        assertEquals("the file .expath-pkg/packages.xml content", xml_content, readFile(packages_xml));
+        final String strPackages_xml = readFile(packages_xml).replaceAll("\r\n", "\n");
+        assertEquals("the file .expath-pkg/packages.xml content", xml_content, strPackages_xml);
         // content dir
         Path c_dir = repo_dir.resolve(content_dir);
         assertTrue("the content dir exist", Files.exists(c_dir));
