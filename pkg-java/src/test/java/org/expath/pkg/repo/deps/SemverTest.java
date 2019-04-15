@@ -336,6 +336,16 @@ public class SemverTest
         boolean result = template.matchesMax(version);
         assertTrue("the version matches the template as maximum", result);
     }
+
+    @Test
+    public void testMatchesMinMax() throws PackageException
+    {
+        Semver template = Semver.parse("1.2.3-alpha");
+        Semver version = Semver.parse("1.2.3-alpha");
+        final boolean result = template.matchesMax(version) && template.matchesMin(version);
+        assertTrue("the version matches the template as maximum", result);
+    }
+
 }
 
 
