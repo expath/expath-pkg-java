@@ -16,6 +16,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.expath.pkg.repo.*;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.Diff;
+
+import javax.xml.transform.Source;
 
 import static org.junit.Assert.*;
 
@@ -42,18 +47,30 @@ public class InstallPackage
         Path       pkg      = Paths.get(".").resolve(xar).toAbsolutePath().normalize();
         // do it
         repo.installPackage(new XarFileSource(pkg), true, new FakeInteract());
+        final Path expathPkgDir = repo_dir.resolve(".expath-pkg");
+
         // .expath-pkg/packages.txt
-        Path expathPkgDir = repo_dir.resolve(".expath-pkg");
-        Path packages_txt = expathPkgDir.resolve("packages.txt");
+        final Path packages_txt = expathPkgDir.resolve("packages.txt");
         assertTrue("the file .expath-pkg/packages.txt exist", Files.exists(packages_txt));
         assertEquals("the file .expath-pkg/packages.txt content", txt_content, readFile(packages_txt));
+
         // .expath-pkg/packages.xml
-        Path packages_xml = expathPkgDir.resolve("packages.xml");
+        final Path packages_xml = expathPkgDir.resolve("packages.xml");
         assertTrue("the file .expath-pkg/packages.xml exist", Files.exists(packages_xml));
-        final String strPackages_xml = readFile(packages_xml).replaceAll("\r\n", "\n");
-        assertEquals("the file .expath-pkg/packages.xml content", xml_content, strPackages_xml);
+
+        final Source expectedPackagesXml = Input.fromString(xml_content).build();
+        final Source actualPackagesXml = Input.fromFile(packages_xml.toFile()).build();
+
+        final Diff diff = DiffBuilder.compare(expectedPackagesXml)
+            .withTest(actualPackagesXml)
+            .normalizeWhitespace()
+            .checkForSimilar()
+            .build();
+
+        assertFalse("the file .expath-pkg/packages.xml content is different: " + diff.toString(), diff.hasDifferences());
+
         // content dir
-        Path c_dir = repo_dir.resolve(content_dir);
+        final Path c_dir = repo_dir.resolve(content_dir);
         assertTrue("the content dir exist", Files.exists(c_dir));
         // TODO: Write more assertions...
     }

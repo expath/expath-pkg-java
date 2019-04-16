@@ -25,6 +25,7 @@
     <properties>
         <project.build.source>1.8</project.build.source>
         <project.build.target>1.8</project.build.target>
+        <xmlunit.version>2.6.2</xmlunit.version>
     </properties>
 
     <dependencies>
@@ -33,6 +34,18 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-core</artifactId>
+            <version>${xmlunit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.xmlunit</groupId>-->
+            <!--<artifactId>xmlunit-matchers</artifactId>-->
+            <!--<version>${xmlunit.version}</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
     </dependencies>
 
 </project>
