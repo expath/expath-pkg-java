@@ -13,8 +13,9 @@ import org.expath.pkg.repo.PackageException;
 
 /**
  * A dependency version using {@code @semver-min} and {@code @semver-max}.
- * 
+ *
  * @author Florent Georges
+ * @author Duncan Paterson
  */
 class DepSemverMinMax
         extends DependencyVersion
@@ -31,7 +32,7 @@ class DepSemverMinMax
             throws PackageException
     {
         Semver rhs = Semver.parse(version);
-        return myMin.matchesMin(rhs) && myMax.matchesMax(rhs) && !myMax.matches(rhs);
+        return myMin.matchesMin(rhs) && myMax.matchesMax(rhs);
     }
 
     private Semver myMin;
