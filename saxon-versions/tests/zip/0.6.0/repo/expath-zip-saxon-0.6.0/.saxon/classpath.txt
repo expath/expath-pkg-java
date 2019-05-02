@@ -1,3 +1,0 @@
-/Users/fgeorges/projects/expath/pkg/saxon/versions/tests/zip/0.6.0/repo/expath-zip-saxon-0.6.0/expath-zip-saxon/lib/tagsoup-1.2.jar
-/Users/fgeorges/projects/expath/pkg/saxon/versions/tests/zip/0.6.0/repo/expath-zip-saxon-0.6.0/expath-zip-saxon/jar/expath-zip-java.jar
-/Users/fgeorges/projects/expath/pkg/saxon/versions/tests/zip/0.6.0/repo/expath-zip-saxon-0.6.0/expath-zip-saxon/jar/expath-zip-saxon.jar
