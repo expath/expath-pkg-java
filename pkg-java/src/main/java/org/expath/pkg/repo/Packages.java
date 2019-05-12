@@ -98,7 +98,7 @@ public class Packages
     public Source resolve(String href, URISpace space, boolean transitive)
             throws PackageException
     {
-        LOG.fine("Package, resolve in {0}: ''{1}'' ({2})", space, href, transitive);
+        LOG.debug("Package, resolve in {0}: ''{1}'' ({2})", space, href, transitive);
         return latest().resolve(href, space, transitive);
     }
 

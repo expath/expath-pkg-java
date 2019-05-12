@@ -46,7 +46,7 @@ public class CompositeUniverse
     public Source resolve(String href, URISpace space, boolean transitive)
             throws PackageException
     {
-        LOG.fine("Composite universe, resolve in {0}: ''{1}'' ({2})", space, href, transitive);
+        LOG.debug("Composite universe, resolve in {0}: ''{1}'' ({2})", space, href, transitive);
         for ( Universe sub : mySubUniverses ) {
             Source src = sub.resolve(href, space, transitive);
             if ( src != null ) {

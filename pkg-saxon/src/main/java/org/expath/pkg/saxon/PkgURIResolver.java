@@ -43,7 +43,7 @@ public class PkgURIResolver
     public Source resolve(String href, String base)
             throws TransformerException
     {
-        LOG.fine("resolve: {0} with base: {1}", href, base);
+        LOG.debug("resolve: {0} with base: {1}", href, base);
         // try the override URIs
         String override = myOverrides.get(href);
         if ( override != null ) {

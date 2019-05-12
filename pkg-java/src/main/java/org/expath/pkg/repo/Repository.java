@@ -433,7 +433,7 @@ public class Repository
     public Source resolve(String href, URISpace space)
             throws PackageException
     {
-        LOG.fine("Repository, resolve in {0}: ''{1}''", space, href);
+        LOG.debug("Repository, resolve in {0}: ''{1}''", space, href);
         for ( Packages pp : myPackages.values() ) {
             Package p = pp.latest();
             Source src = p.resolve(href, space);

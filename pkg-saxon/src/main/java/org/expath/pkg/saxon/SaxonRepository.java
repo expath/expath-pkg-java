@@ -191,7 +191,7 @@ public class SaxonRepository
         if ( prop == null || "".equals(prop) ) {
             return res;
         }
-        LOG.fine("Property {0} value is: {1}", OVERRIDE_PROP, prop);
+        LOG.debug("Property {0} value is: {1}", OVERRIDE_PROP, prop);
         for ( String override : prop.split(",") ) {
             // ignore empty one (so allow the prop ",something else")
             if ( override == null || "".equals(override) ) {

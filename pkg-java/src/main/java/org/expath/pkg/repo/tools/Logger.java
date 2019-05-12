@@ -9,7 +9,7 @@
 
 package org.expath.pkg.repo.tools;
 
-import java.util.logging.Level;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wrapper around the Java Logging facility.
@@ -18,9 +18,9 @@ import java.util.logging.Level;
  */
 public class Logger
 {
-    private Logger(Class c)
+    private Logger(final Class c)
     {
-        myLogger = java.util.logging.Logger.getLogger(c.getName());
+        myLogger = LoggerFactory.getLogger(c);
     }
 
     public static Logger getLogger(Class c)
@@ -28,28 +28,27 @@ public class Logger
         return new Logger(c);
     }
 
-    public void finer(String msg, Object... args)
+    public void trace(String msg, Object... args)
     {
-        myLogger.log(Level.FINER, msg, args);
+        myLogger.trace(msg, args);
     }
 
-    public void fine(String msg, Object... args)
+    public void debug(String msg, Object... args)
     {
-        myLogger.log(Level.FINE, msg, args);
+        myLogger.debug(msg, args);
     }
 
     public void info(String msg, Object... args)
     {
-        myLogger.log(Level.INFO, msg, args);
+        myLogger.info(msg, args);
     }
 
-    public void severe(String msg, Object... args)
+    public void error(String msg, Object... args)
     {
-        myLogger.log(Level.SEVERE, msg, args);
+        myLogger.error(msg, args);
     }
 
-    @SuppressWarnings("NonConstantLogger")
-    private java.util.logging.Logger myLogger;
+    private final org.slf4j.Logger myLogger;
 }
 
 

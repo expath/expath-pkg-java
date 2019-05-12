@@ -54,7 +54,7 @@ public class SaxonPkgInfo
         try {
             // the libraries
             for ( String name : myLibs ) {
-                LOG.fine("Register library class {0}", name);
+                LOG.debug("Register library class {0}", name);
                 Class clazz;
                 try {
                     clazz = Class.forName(name);
@@ -74,7 +74,7 @@ public class SaxonPkgInfo
             }
             // the functions
             for ( String name : myFuns ) {
-                LOG.fine("Register function class {0}", name);
+                LOG.debug("Register function class {0}", name);
                 Class clazz;
                 try {
                     clazz = Class.forName(name);
@@ -216,7 +216,7 @@ public class SaxonPkgInfo
                 throw new XPathException("The file does not result in a valid URI", ex);
             }
         }
-        LOG.fine("Use the following CP for registerExtensionFunctions: {0}", cp);
+        LOG.debug("Use the following CP for registerExtensionFunctions: {0}", cp);
         try {
             ClassLoader parent = SaxonPkgInfo.class.getClassLoader();
             return new URLClassLoader(cp.toArray(new URL[0]), parent);

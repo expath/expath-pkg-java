@@ -44,9 +44,9 @@ public class PkgModuleResolver
     public StreamSource[] resolve(String module_uri, String base_uri, String[] locations)
             throws XPathException
     {
-        LOG.fine("resolve: {0} with base: {1}", module_uri, base_uri);
+        LOG.debug("resolve: {0} with base: {1}", module_uri, base_uri);
         for ( String l : locations ) {
-            LOG.fine("  location: {0}", l);
+            LOG.debug("  location: {0}", l);
         }
 
         try {

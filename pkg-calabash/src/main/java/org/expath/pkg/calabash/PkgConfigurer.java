@@ -36,17 +36,17 @@ public class PkgConfigurer
     {
         myRuntime = runtime;
         String repo_value = System.getProperty("org.expath.pkg.calabash.repo");
-        LOG.fine("org.expath.pkg.calabash.repo: {0}", repo_value);
+        LOG.debug("org.expath.pkg.calabash.repo: {0}", repo_value);
         if ( repo_value == null ) {
             repo_value = System.getenv("EXPATH_REPO");
-            LOG.fine("$EPATH_REPO: {0}", repo_value);
+            LOG.debug("$EPATH_REPO: {0}", repo_value);
         }
         if ( repo_value == null ) {
             // TODO: Detect if --debug is enabled, and then display a message
             // properly formatted for humans (not through logs), including basic
             // doc and links to reference material.
-            LOG.severe("Unable to locate the EXPath repository, cannot set up packaging");
-            LOG.severe("Use ++repo, org.expath.pkg.calabash.repo, or $EXPATH_REPO to enable it");
+            LOG.error("Unable to locate the EXPath repository, cannot set up packaging");
+            LOG.error("Use ++repo, org.expath.pkg.calabash.repo, or $EXPATH_REPO to enable it");
             return;
         }
         LOG.info("Initialize EXPath Packaging with: {0}", repo_value);
