@@ -3,11 +3,9 @@
 
 # EXPath Packaging for Java
 
-**NOTE:** This is a fork and advancement of the code taken from [fgeorges/expath-pkg-java](https://github.com/fgeorges/expath-pkg-java). Unfortunately we were unable to get changes via PR upstreamed, so we have forked the project here.
+**NOTE:** This is the new place for [fgeorges/expath-pkg-java](https://github.com/fgeorges/expath-pkg-java).
 
-Implementation of the EXPath [Packaging System](http://expath.org/modules/pkg/)
-for Java.
-
+Implementation of the EXPath [Packaging System](http://expath.org/modules/pkg/) for Java.
 
 ## Installation
 
