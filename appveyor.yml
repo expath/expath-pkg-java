@@ -10,3 +10,5 @@ build_script:
 test_script:
   - cmd: mvn test verify -B
 
+cache:
+  - '%USERPROFILE%\.m2'
