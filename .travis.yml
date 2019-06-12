@@ -2,9 +2,17 @@ language: java
 
 dist: xenial
 
-jdk:
-  # - openjdk11
-  - openjdk8
+matrix:
+  include:
+    - jdk: openjdk8
+    - jdk: openjdk9
+    - jdk: openjdk10
+    - jdk: openjdk11
+    - jdk: openjdk12
+
+    - os: osx
+      osx_image: xcode10.2
+      env: JAVA_HOME=$(/usr/libexec/java_home)
 
 cache:
   directories:
