@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.com/expath/expath-pkg-java.png?branch=develop)](https://travis-ci.com/expath/expath-pkg-java)
-[![Build status](https://ci.appveyor.com/api/projects/status/jb816i3e4fh8wob3/branch/develop?svg=true)](https://ci.appveyor.com/project/AdamRetter/expath-pkg-java/branch/develop)
+[![Build Status](https://travis-ci.com/expath/expath-pkg-java.png?branch=master)](https://travis-ci.com/expath/expath-pkg-java)
+[![Build status](https://ci.appveyor.com/api/projects/status/jb816i3e4fh8wob3/branch/master?svg=true)](https://ci.appveyor.com/project/AdamRetter/expath-pkg-java/branch/master)
 
 # EXPath Packaging for Java
 
