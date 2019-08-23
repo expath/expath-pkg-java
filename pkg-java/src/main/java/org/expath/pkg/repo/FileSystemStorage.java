@@ -219,7 +219,7 @@ public class FileSystemStorage
             boolean new_exists = Files.exists(new_style);
             boolean old_isdir = Files.isDirectory(old_style);
             boolean new_isdir = Files.isDirectory(new_style);
-            LOG.trace("Content dir ''{0}'' (exists:{1}/isdir:{2}), and ''{3}'' (exists:{4}/isdir:{5})",
+            LOG.trace("Content dir '{}' (exists:{}/isdir:{}), and '{}' (exists:{}/isdir:{})",
                     new_style, new_exists, new_isdir, old_style, old_exists, old_isdir);
             if ( ! old_exists && ! new_exists ) {
                 String msg = "None of content dirs exist: '" + new_style + "' and '" + old_style + "'";
@@ -248,7 +248,7 @@ public class FileSystemStorage
                     LOG.info(msg);
                     throw new PackageException(msg);
                 }
-                LOG.info("Warning: package uses old-style content dir: ''{0}''", old_style);
+                LOG.info("Warning: package uses old-style content dir: '{}'", old_style);
                 return old_style;
             }
         }
@@ -289,7 +289,7 @@ public class FileSystemStorage
                 throws PackageException
                      , NotExistException
         {
-            LOG.debug("Trying to resolve ''{0}'' within ''{1}''", path, dir);
+            LOG.debug("Trying to resolve '{}' within '{}'", path, dir);
             Path f = dir.resolve(path);
             if ( ! Files.exists(f) ) {
                 String msg = "File '" + f + "' does not exist";

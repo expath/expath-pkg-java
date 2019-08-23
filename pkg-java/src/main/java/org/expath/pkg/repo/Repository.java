@@ -48,7 +48,7 @@ public class Repository
     public Repository(Storage storage)
             throws PackageException
     {
-        LOG.info("Create a new repository with storage: {0}", storage);
+        LOG.info("Create a new repository with storage: {}", storage);
         myStorage    = storage;
         myPackages   = new HashMap<String, Packages>();
         myExtensions = new HashMap<String, Extension>();
@@ -433,7 +433,7 @@ public class Repository
     public Source resolve(String href, URISpace space)
             throws PackageException
     {
-        LOG.debug("Repository, resolve in {0}: ''{1}''", space, href);
+        LOG.debug("Repository, resolve in {}: '{}'", space, href);
         for ( Packages pp : myPackages.values() ) {
             Package p = pp.latest();
             Source src = p.resolve(href, space);

@@ -54,7 +54,7 @@ public class SaxonPkgInfo
         try {
             // the libraries
             for ( String name : myLibs ) {
-                LOG.debug("Register library class {0}", name);
+                LOG.debug("Register library class {}", name);
                 Class clazz;
                 try {
                     clazz = Class.forName(name);
@@ -74,7 +74,7 @@ public class SaxonPkgInfo
             }
             // the functions
             for ( String name : myFuns ) {
-                LOG.debug("Register function class {0}", name);
+                LOG.debug("Register function class {}", name);
                 Class clazz;
                 try {
                     clazz = Class.forName(name);
@@ -216,14 +216,14 @@ public class SaxonPkgInfo
                 throw new XPathException("The file does not result in a valid URI", ex);
             }
         }
-        LOG.debug("Use the following CP for registerExtensionFunctions: {0}", cp);
+        LOG.debug("Use the following CP for registerExtensionFunctions: {}", cp);
         try {
             ClassLoader parent = SaxonPkgInfo.class.getClassLoader();
             return new URLClassLoader(cp.toArray(new URL[0]), parent);
         }
         // can be thrown in a servlet container with restrictions...
         catch ( AccessControlException ex ) {
-            LOG.info("Access control error: {0}", ex);
+            LOG.info("Access control error: {}", ex);
             return null;
         }
     }

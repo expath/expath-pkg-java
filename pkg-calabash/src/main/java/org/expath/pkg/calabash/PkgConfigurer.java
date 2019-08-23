@@ -36,10 +36,10 @@ public class PkgConfigurer
     {
         myRuntime = runtime;
         String repo_value = System.getProperty("org.expath.pkg.calabash.repo");
-        LOG.debug("org.expath.pkg.calabash.repo: {0}", repo_value);
+        LOG.debug("org.expath.pkg.calabash.repo: {}", repo_value);
         if ( repo_value == null ) {
             repo_value = System.getenv("EXPATH_REPO");
-            LOG.debug("$EPATH_REPO: {0}", repo_value);
+            LOG.debug("$EPATH_REPO: {}", repo_value);
         }
         if ( repo_value == null ) {
             // TODO: Detect if --debug is enabled, and then display a message
@@ -49,7 +49,7 @@ public class PkgConfigurer
             LOG.error("Use ++repo, org.expath.pkg.calabash.repo, or $EXPATH_REPO to enable it");
             return;
         }
-        LOG.info("Initialize EXPath Packaging with: {0}", repo_value);
+        LOG.info("Initialize EXPath Packaging with: {}", repo_value);
         try {
             Storage storage = new FileSystemStorage(new File(repo_value).toPath());
             myRepo = new Repository(storage);

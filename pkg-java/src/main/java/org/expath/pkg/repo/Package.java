@@ -48,7 +48,7 @@ public class Package
     public void addPublicUri(URISpace space, String href, String relative)
             throws PackageException
     {
-        LOG.debug("Package ''{0}'', add URI in {1}: ''{2}'', to map to ''({3})''", myName, space, href, relative);
+        LOG.debug("Package '{}', add URI in {}: '{}', to map to '({})'", myName, space, href, relative);
         Map<String, String> map = myPublicUris.get(space);
         if ( map == null ) {
             map = new HashMap<String, String>();
@@ -79,16 +79,16 @@ public class Package
         // the map for this URI space
         Map<String, String> map = myPublicUris.get(space);
         if ( map == null ) {
-            LOG.debug("Package ''{0}'', no URI in {1}", myName, space);
+            LOG.debug("Package '{}', no URI in {}", myName, space);
             return null;
         }
         // the file for this href in this package's map
         String rel = map.get(href);
         if ( rel == null ) {
-            LOG.debug("Package ''{0}'', not in {1}: ''{2}''", myName, space, href);
+            LOG.debug("Package '{}', not in {}: '{}'", myName, space, href);
             return null;
         }
-        LOG.debug("Package ''{0}'', resolved ''{1}'' in {2} to ''{3}''", myName, href, space, rel);
+        LOG.debug("Package '{}', resolved '{}' in {} to '{}'", myName, href, space, rel);
         try {
             // resolve the file ref into a JAXP source
             return myResolver.resolveComponent(rel);
@@ -110,7 +110,7 @@ public class Package
     public Source resolve(String href, URISpace space, boolean transitive)
             throws PackageException
     {
-        LOG.debug("Package ''{0}'', resolve in {1}: ''{2}'' ({3})", myName, space, href, transitive);
+        LOG.debug("Package '{}', resolve in {}: '{}' ({})", myName, space, href, transitive);
         Source src = resolveInThisPackage(href, space);
         if ( src != null ) {
             return src;

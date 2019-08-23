@@ -56,7 +56,7 @@ public class ClasspathStorage
         String rsrc = myRoot.replace('.', '/') + "/" + ".expath-pkg/packages.txt";
         ClassLoader loader = ClasspathStorage.class.getClassLoader();
         InputStream res = loader.getResourceAsStream(rsrc);
-        LOG.debug("Resolve resource .expath-pkg/packages.txt to ''{0}''", res);
+        LOG.debug("Resolve resource .expath-pkg/packages.txt to '{}'", res);
         return PackagesTxtFile.parseDirectories(res);
     }
 
@@ -151,7 +151,7 @@ public class ClasspathStorage
             String new_style = pkg_root + "content/";
             URL old_url = loader.getResource(old_style);
             URL new_url = loader.getResource(new_style);
-            LOG.trace("Content dir ''{0}'' is ''{1}'', and ''{2}'' is ''{3}''", new_style, new_url, old_style, old_url);
+            LOG.trace("Content dir '{}' is '{}', and '{}' is '{}'", new_style, new_url, old_style, old_url);
             if ( old_url == null && new_url == null ) {
                 String msg = "None of content dirs exist: '" + new_style + "' and '" + old_style + "'";
                 LOG.info(msg);
@@ -166,7 +166,7 @@ public class ClasspathStorage
                 return new_style;
             }
             else {
-                LOG.info("Warning: package uses old-style content dir: ''{0}''", old_style);
+                LOG.info("Warning: package uses old-style content dir: '{}'", old_style);
                 return old_style;
             }
         }
