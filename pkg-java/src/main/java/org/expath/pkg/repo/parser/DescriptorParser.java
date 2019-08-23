@@ -30,6 +30,15 @@ public class DescriptorParser
 {
     /**
      * Parse a package descriptor and build the corresponding {@link Package} object.
+     *
+     * @param desc the package descriptor
+     * @param rsrc_name the resource name
+     * @param storage the repository storage
+     * @param repo the repository
+     *
+     * @return the package
+     *
+     * @throws PackageException if an error occurs during parsing
      */
     public Package parse(Source desc, String rsrc_name, Storage storage, Repository repo)
             throws PackageException
@@ -91,6 +100,12 @@ public class DescriptorParser
 
     /**
      * Handle a dependency element.
+     *
+     * @param parser the parser
+     * @param pkg the package
+     *
+     * @throws PackageException if an error occurs
+     * @throws XMLStreamException if an error occurs reading the stream
      */
     private void handleDependency(XMLStreamReader parser, Package pkg)
             throws PackageException
@@ -119,6 +134,12 @@ public class DescriptorParser
 
     /**
      * Handle any single parse event after pkg:dependency elements.
+     *
+     * @param parser the parser
+     * @param pkg the package
+     *
+     * @throws PackageException if an error occurs
+     * @throws XMLStreamException if an error occurs reading the stream
      */
     private void handleComponent(XMLStreamReader parser, Package pkg)
             throws PackageException

@@ -51,6 +51,11 @@ public abstract class Extension
      * initialize it.  For instance by parsing an extension-specific descriptor.
      * This function is not supposed to modify the state of the repository, like
      * {@code install()} does.
+     *
+     * @param repo the repository
+     * @param pkg the package descriptor
+     *
+     * @throws PackageException if an error occurs
      */
     public abstract void init(Repository repo, Package pkg)
             throws PackageException;
@@ -64,6 +69,11 @@ public abstract class Extension
      * 
      * This function is supposed to initialize the {@link Package} object as
      * well, like {@code init()} does.
+     *
+     * @param repo the repository
+     * @param pkg the package descriptor
+     *
+     * @throws PackageException if an error occurs
      */
     public abstract void install(Repository repo, Package pkg)
             throws PackageException;

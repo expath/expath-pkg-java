@@ -131,6 +131,13 @@ public class SaxonRepository
      *
      * TODO: Regarding versionning, see comments of {@link Repository#resolve(String,URISpace)}
      * (AKA we don't always want the latest version).
+     *
+     * @param href the URI
+     * @param space the URI space
+     *
+     * @return the source
+     *
+     * @throws PackageException if an error occurs
      */
     public Source resolve(String href, URISpace space)
             throws PackageException
@@ -159,6 +166,10 @@ public class SaxonRepository
     /**
      * TODO: Regarding versionning, see comments of {@link Repository#resolve(String,URISpace)}
      * (AKA we don't always want the latest version).
+     *
+     * @param config the configuration
+     *
+     * @throws PackageException if an error occurs
      */
     public void registerExtensionFunctions(Configuration config)
             throws PackageException
@@ -182,7 +193,7 @@ public class SaxonRepository
     }
 
     /**
-     * ...
+     * @throws PackageException if an error occurs
      */
     private static Map<String, String> parseOverrideProperty()
             throws PackageException

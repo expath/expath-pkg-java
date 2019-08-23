@@ -64,6 +64,10 @@ public class Repository
 
     /**
      * Shortcut for {@code makeDefaultRepo(null)}.
+     *
+     * @return the repository
+     *
+     * @throws PackageException if an error occurs
      */
     public static Repository makeDefaultRepo()
             throws PackageException
@@ -82,6 +86,12 @@ public class Repository
      * It throws an exception if the the directory does not exist (or is not a
      * directory), or if there is any error creating the repository object from
      * it.
+     *
+     * @param dir the repository dir
+     *
+     * @return the repository
+     *
+     * @throws PackageException if an error occurs
      */
     public static Repository makeDefaultRepo(String dir)
             throws PackageException
@@ -112,7 +122,11 @@ public class Repository
     }
 
     /**
-     * ...
+     * Register an extension.
+     *
+     * @param ext the extension
+     *
+     * @throws PackageException if an error occurs
      */
     final public void registerExtension(Extension ext)
             throws PackageException
@@ -125,6 +139,8 @@ public class Repository
 
     /**
      * Reload the repository configuration, so parse again the package descriptors.
+     *
+     * @throws PackageException if an error occurs
      */
     public synchronized void reload()
             throws PackageException
@@ -135,6 +151,8 @@ public class Repository
     }
 
     /**
+     * Get the repository storage.
+     *
      * @return The {@link Storage} object this repository is based upon.
      */
     public Storage getStorage()
@@ -153,9 +171,15 @@ public class Repository
     }
 
     /**
-     * ...
+     * Create a repository.
      *
      * TODO: Must be delegated to the storage!
+     *
+     * @param dir the repository dir
+     *
+     * @return the repository
+     *
+     * @throws PackageException if an error occurs
      */
     public static Repository createRepository(Path dir)
             throws PackageException

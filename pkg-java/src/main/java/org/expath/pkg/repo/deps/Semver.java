@@ -120,6 +120,12 @@ public class Semver implements Comparable<Semver> {
 
     /**
      * Does {@code rhs} (a SemVer version) match this SemVer template?
+     *
+     * @param rhs the other Semver
+     *
+     * @return true if this Semver matches the other Semver, false otherwise
+     *
+     * @throws PackageException if an error occurs
      */
     public boolean matches(final Semver rhs)
             throws PackageException {
@@ -131,6 +137,12 @@ public class Semver implements Comparable<Semver> {
      * Does {@code rhs} (a SemVer version) match this SemVer template as a minimum?
      * <p>
      * Return true if {@code rhs} is equal or above this template.
+     *
+     * @param rhs the other Semver
+     *
+     * @return true if this Semver minimally matches the other Semver, false otherwise
+     *
+     * @throws PackageException if an error occurs
      */
     public boolean matchesMin(final Semver rhs)
             throws PackageException {
@@ -141,6 +153,12 @@ public class Semver implements Comparable<Semver> {
      * Does {@code rhs} (a SemVer version) match this SemVer template as a maximum?
      * <p>
      * Return true if {@code rhs} is equal or below this template.
+     *
+     * @param rhs the other Semver
+     *
+     * @return true if this Semver maximally matches the other Semver, false otherwise
+     *
+     * @throws PackageException if an error occurs
      */
     public boolean matchesMax(final Semver rhs)
             throws PackageException {

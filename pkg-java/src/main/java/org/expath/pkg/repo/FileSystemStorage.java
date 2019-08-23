@@ -146,6 +146,8 @@ public class FileSystemStorage
 
     /**
      * If true (the default), an error is thrown if there is no content dir in the package.
+     *
+     * @param value the new value
      */
     public void setErrorIfNoContentDir(boolean value)
     {

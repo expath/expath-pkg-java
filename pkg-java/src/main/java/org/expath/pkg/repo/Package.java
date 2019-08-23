@@ -45,7 +45,11 @@ public class Package
     }
 
     /**
-     * {@code relative} is the filename relative to the module dir.
+     * @param space the URI space
+     * @param href the URI
+     * @param relative the filename relative to the module dir.
+     *
+     * @throws PackageException if an error occurs
      */
     public void addPublicUri(URISpace space, String href, String relative)
             throws PackageException
@@ -67,6 +71,13 @@ public class Package
      * Resolve the href if it exists in this package, or return null.
      *
      * Do not "recurse" into the declared dependencies.
+     *
+     * @param href the URI
+     * @param space the URI space
+     *
+     * @return the source
+     *
+     * @throws PackageException if an error occurs
      */
     private Source resolveInThisPackage(String href, URISpace space)
             throws PackageException
@@ -135,6 +146,12 @@ public class Package
 
     /**
      * Return the latest available package from the repo compatible with the dependency.
+     *
+     * @param dep the package dependency
+     *
+     * @return the resolved package dependency, or null
+     *
+     * @throws PackageException if an error occurs
      */
     private Package resolveDependency(PkgDependency dep)
             throws PackageException
@@ -160,6 +177,8 @@ public class Package
 
     /**
      * The package name.
+     *
+     * @return the package name.
      */
     public String getName()
     {
@@ -168,6 +187,8 @@ public class Package
 
     /**
      * The package abbrev.
+     *
+     * @return the package abbrev.
      */
     public String getAbbrev()
     {
@@ -176,6 +197,8 @@ public class Package
 
     /**
      * The package version.
+     *
+     * @return the package version.
      */
     public String getVersion()
     {
@@ -184,6 +207,10 @@ public class Package
 
     /**
      * Return the info object with the given name, null if there is no such info.
+     *
+     * @param name the package name
+     *
+     * @return the package info, or null
      */
     public PackageInfo getInfo(String name)
     {
@@ -192,6 +219,9 @@ public class Package
 
     /**
      * Set the info object for the given name.
+     *
+     * @param name the package name
+     * @param info the package info
      *
      * @throws PackageException
      *      If there is already an info object with that name.
@@ -207,6 +237,9 @@ public class Package
 
     /**
      * Set the info object for the given name.
+     *
+     * @param name the package name
+     * @param info the package info
      */
     public void setInfo(String name, PackageInfo info)
     {
@@ -215,6 +248,8 @@ public class Package
 
     /**
      * Return the dependencies on packages.
+     *
+     * @return the package dependencies
      */
     public Collection<PkgDependency> getPackageDeps()
     {
@@ -223,6 +258,14 @@ public class Package
 
     /**
      * Add a dependency on a package.
+     *
+     * @param pkg the package name
+     * @param versions the package versions
+     * @param semver the semantic version
+     * @param min the minimum version
+     * @param max the maximum version
+     *
+     * @throws PackageException if an error occurs
      */
     public void addPackageDep(String pkg, String versions, String semver, String min, String max)
             throws PackageException
@@ -234,6 +277,8 @@ public class Package
 
     /**
      * Return the dependencies on processors.
+     *
+     * @return the processor dependencies
      */
     public Collection<ProcessorDependency> getProcessorDeps()
     {
@@ -242,6 +287,12 @@ public class Package
 
     /**
      * Add a dependency on a processor.
+     *
+     * @param proc the processor name
+     * @param versions the processor versions
+     * @param semver the semantic version
+     * @param min the minimum version
+     * @param max the maximum version
      */
     public void addProcessorDep(String proc, String versions, String semver, String min, String max)
     {

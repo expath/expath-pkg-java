@@ -10,6 +10,7 @@
 
 package org.expath.pkg.repo.parser;
 
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.expath.pkg.repo.Package;
 import org.expath.pkg.repo.PackageException;
@@ -26,6 +27,12 @@ public interface PkgComponentHandler
      * 
      * This handler has to have been registered for the element it handles in
      * the {@code Repository}.
+     *
+     * @param parser the parser
+     * @param pkg the package
+     * @param helper the stream helper
+     *
+     * @throws PackageException if an error occurs
      */
     public void handleDescription(XMLStreamReader parser, Package pkg, XMLStreamHelper helper)
             throws PackageException;

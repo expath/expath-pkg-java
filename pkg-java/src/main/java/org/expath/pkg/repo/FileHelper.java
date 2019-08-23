@@ -33,6 +33,10 @@ public class FileHelper
      * 
      * Throw an error if the directory already exists and is not actually a
      * directory, or if there is an error creating it.
+     *
+     * @param dir the directory path
+     *
+     * @throws PackageException if an error occurs
      */
     public static void ensureDir(Path dir)
             throws PackageException
@@ -56,6 +60,13 @@ public class FileHelper
      * 
      * The new directory is empty, and its name is based on {@code prefix},
      * and on the current date after the prefix.
+     *
+     * @param prefix the prefix for the temporary directory
+     * @param parent the directory in which to create the temporary directory
+     *
+     * @return the path to the temporary directory.
+     *
+     * @throws PackageException if an error occurs
      */
     public static Path makeTempDir(final String prefix, final Path parent)
             throws PackageException
@@ -200,6 +211,8 @@ public class FileHelper
      * @param directory The directory to list the entries for
      *
      * @return The list of entries
+     *
+     * @throws IOException if the an error occurs whilst listing the directories
      */
     public static List<Path> list(final Path directory) throws IOException {
         try(final Stream<Path> entries = Files.list(directory)) {

@@ -186,6 +186,10 @@ public class XMLStreamHelper
      * The parser's current event must be START_ELEMENT.
      *
      * Ignore all this element end stops on the corresponding END_ELEMENT event.
+     *
+     * @param parser the parser
+     *
+     * @throws PackageException if an error occurs
      */
     public void ignoreElement(XMLStreamReader parser)
             throws PackageException

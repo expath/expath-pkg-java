@@ -32,6 +32,13 @@ public interface Universe
      *
      * Whether package dependencies are used to resolve the href has to be
      * defined by each implementation of this interface.
+     *
+     * @param href the URI
+     * @param space the URI space
+     *
+     * @return the source
+     *
+     * @throws PackageException if an error occurs
      */
     public Source resolve(String href, URISpace space)
             throws PackageException;
@@ -39,8 +46,13 @@ public interface Universe
     /**
      * Resolve a specific URI, in a specific space, into a stream source.
      *
-     * Whether package dependencies are used to resolve the href is set by
-     * {@code transitive}.
+     * @param href the URI
+     * @param space the URI space
+     * @param transitive true if package dependencies are used to resolve the href
+     *
+     * @return the source
+     *
+     * @throws PackageException if an error occurs
      */
     public Source resolve(String href, URISpace space, boolean transitive)
             throws PackageException;

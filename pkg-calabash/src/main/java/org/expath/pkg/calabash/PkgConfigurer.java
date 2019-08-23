@@ -114,7 +114,7 @@ public class PkgConfigurer
     private JaxpConfigurer        myJaxp     = null;
     private JingConfigurer        myJing     = null;
     private SaxonConfigurer       mySaxon    = null;
-    private static final Logger LOG = LoggerFactory.getLogger(PkgConfigurer.class); 
+    private static final Logger LOG = LoggerFactory.getLogger(PkgConfigurer.class);
 }
 
 
