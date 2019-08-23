@@ -39,7 +39,7 @@ public class PkgConfigurer
         LOG.debug("org.expath.pkg.calabash.repo: {}", repo_value);
         if ( repo_value == null ) {
             repo_value = System.getenv("EXPATH_REPO");
-            LOG.debug("$EPATH_REPO: {}", repo_value);
+            LOG.debug("$EXPATH_REPO: {}", repo_value);
         }
         if ( repo_value == null ) {
             // TODO: Detect if --debug is enabled, and then display a message

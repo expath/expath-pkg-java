@@ -79,7 +79,7 @@ public class ClasspathStorage
             throws PackageException
     {
         throw new UnsupportedOperationException(
-                "Could be impemented on classpath storage, but is only used to install...");
+                "Could be implemented on classpath storage, but is only used to install...");
     }
 
     @Override
