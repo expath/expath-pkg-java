@@ -9,10 +9,12 @@
 
 package org.expath.pkg.repo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.xml.transform.Source;
-import org.expath.pkg.repo.tools.Logger;
 
 /**
  * Create a universe by assembling several sub-universes.
@@ -58,7 +60,7 @@ public class CompositeUniverse
 
     private boolean myTransitive;
     private Collection<Universe> mySubUniverses = new ArrayList<Universe>();
-    private static final Logger LOG = Logger.getLogger(CompositeUniverse.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CompositeUniverse.class);
 }
 
 

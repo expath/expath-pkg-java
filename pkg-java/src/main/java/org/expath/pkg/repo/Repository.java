@@ -25,7 +25,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import org.expath.pkg.repo.Storage.PackageResolver;
 import org.expath.pkg.repo.parser.DescriptorParser;
-import org.expath.pkg.repo.tools.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represent a standard EXPath package repository structure on the disk.
@@ -525,7 +526,7 @@ public class Repository
     /**
      * The logger.
      */
-    private static final Logger LOG = Logger.getLogger(Repository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Repository.class);
 
     /**
      * Exception raised when trying to install a package already installed.

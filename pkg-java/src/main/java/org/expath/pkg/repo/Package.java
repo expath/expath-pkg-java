@@ -12,6 +12,9 @@ package org.expath.pkg.repo;
 import org.expath.pkg.repo.deps.DependencyVersion;
 import org.expath.pkg.repo.deps.ProcessorDependency;
 import org.expath.pkg.repo.deps.PkgDependency;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -19,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.xml.transform.Source;
-import org.expath.pkg.repo.tools.Logger;
 
 /**
  * Represent a particular package, with a particular version.
@@ -262,7 +264,7 @@ public class Package
     private List<ProcessorDependency> myProcDeps = new ArrayList<ProcessorDependency>();
     private Map<String, PackageInfo> myInfos;
     private Map<URISpace, Map<String, String>> myPublicUris;
-    private static final Logger LOG = Logger.getLogger(Package.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Package.class);
 }
 
 

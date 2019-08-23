@@ -22,7 +22,8 @@ import org.expath.pkg.repo.FileSystemStorage;
 import org.expath.pkg.repo.PackageException;
 import org.expath.pkg.repo.Repository;
 import org.expath.pkg.repo.Storage;
-import org.expath.pkg.repo.tools.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Calabash configurer factory for the EXPath Packaging System.
@@ -113,7 +114,7 @@ public class PkgConfigurer
     private JaxpConfigurer        myJaxp     = null;
     private JingConfigurer        myJing     = null;
     private SaxonConfigurer       mySaxon    = null;
-    private static final Logger LOG = Logger.getLogger(PkgConfigurer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PkgConfigurer.class); 
 }
 
 

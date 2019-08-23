@@ -22,7 +22,8 @@ import net.sf.saxon.trans.XPathException;
 import org.expath.pkg.repo.PackageException;
 import org.expath.pkg.repo.Repository;
 import org.expath.pkg.repo.URISpace;
-import org.expath.pkg.repo.tools.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation for EXPath Pkg of Saxon's {@link ModuleURIResolver} for XQuery.
@@ -100,7 +101,7 @@ public class PkgModuleResolver
     /** The pkg-repo's repository, to delegate everything else to. */
     private final Repository myParent;
     /** The logger. */
-    private static final Logger LOG = Logger.getLogger(PkgModuleResolver.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PkgModuleResolver.class);
 }
 
 

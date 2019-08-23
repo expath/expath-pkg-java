@@ -29,11 +29,12 @@ import net.sf.saxon.trans.XPathException;
 import org.expath.pkg.repo.Package;
 import org.expath.pkg.repo.*;
 import org.expath.pkg.repo.Storage.PackageResolver;
-import org.expath.pkg.repo.tools.Logger;
 import org.expath.tools.ToolsException;
 import org.expath.tools.saxon.fun.Definition;
 import org.expath.tools.saxon.fun.Function;
 import org.expath.tools.saxon.fun.Library;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO: ...
@@ -266,7 +267,8 @@ public class SaxonPkgInfo
     private final Map<String, String> myXqueryWrappers = new HashMap<String, String>();
 
     /** The logger. */
-    private static final Logger LOG = Logger.getLogger(SaxonPkgInfo.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SaxonPkgInfo.class);
+
     /** The content of the empty wrapper stylesheet. */
     private static final String EMPTY_STYLESHEET =
             "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'/>\n";

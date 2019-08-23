@@ -20,7 +20,8 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ModuleURIResolver;
 import org.expath.pkg.repo.*;
 import org.expath.pkg.repo.Package;
-import org.expath.pkg.repo.tools.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wrap an EXPath repository with Saxon-specific services.
@@ -214,7 +215,7 @@ public class SaxonRepository
     /** The cached overrides map. */
     private static Map<String, String> OVERRIDES = null;
     /** The logger. */
-    private static final Logger LOG = Logger.getLogger(SaxonRepository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SaxonRepository.class);
 }
 
 

@@ -9,7 +9,8 @@
 
 package org.expath.pkg.repo;
 
-import org.expath.pkg.repo.tools.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -215,7 +216,7 @@ public class FileHelper
     }
 
     /** The logger. */
-    private static final Logger LOG = Logger.getLogger(FileHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileHelper.class);
 }
 
 /* ------------------------------------------------------------------------ */

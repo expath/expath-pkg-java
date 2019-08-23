@@ -10,12 +10,14 @@
 package org.expath.pkg.repo;
 
 import org.expath.pkg.repo.deps.Semver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import javax.xml.transform.Source;
-import org.expath.pkg.repo.tools.Logger;
 
 /**
  * One abstract package, possible containing several versions.
@@ -118,7 +120,7 @@ public class Packages
 
     private String myName;
     private List<Package> myPackages = new ArrayList<Package>();
-    private static final Logger LOG = Logger.getLogger(Packages.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Packages.class);
 }
 
 

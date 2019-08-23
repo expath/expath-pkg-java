@@ -16,9 +16,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import javax.xml.transform.stream.StreamSource;
-import org.expath.pkg.repo.tools.Logger;
 import org.expath.pkg.repo.tools.PackagesTxtFile;
 import org.expath.pkg.repo.tools.PackagesXmlFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Storage using the file system.
@@ -162,7 +163,7 @@ public class FileSystemStorage
     }
 
     /** The logger. */
-    private static final Logger LOG = Logger.getLogger(FileSystemStorage.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileSystemStorage.class);
 
     /** The root dir of the repo. */
     private Path myRoot;

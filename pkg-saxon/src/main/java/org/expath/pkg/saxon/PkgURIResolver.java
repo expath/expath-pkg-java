@@ -20,7 +20,8 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import org.expath.pkg.repo.PackageException;
 import org.expath.pkg.repo.URISpace;
-import org.expath.pkg.repo.tools.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * URI Resolver to resolve within a repository.
@@ -81,7 +82,7 @@ public class PkgURIResolver
     /** ... */
     private final URISpace mySpace;
     /** The logger. */
-    private static final Logger LOG = Logger.getLogger(PkgURIResolver.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PkgURIResolver.class);
 }
 
 

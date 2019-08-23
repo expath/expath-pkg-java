@@ -16,8 +16,9 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.Set;
 import javax.xml.transform.stream.StreamSource;
-import org.expath.pkg.repo.tools.Logger;
 import org.expath.pkg.repo.tools.PackagesTxtFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Storage using the classpath.
@@ -217,7 +218,7 @@ public class ClasspathStorage
         private final ClassLoader myLoader;
     }
 
-    private static final Logger LOG = Logger.getLogger(ClasspathStorage.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClasspathStorage.class);
 }
 
 
