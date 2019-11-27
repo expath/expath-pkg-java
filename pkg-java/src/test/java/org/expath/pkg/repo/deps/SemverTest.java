@@ -1,9 +1,11 @@
 /****************************************************************************/
 /*  File:       SemverTest.java                                             */
 /*  Author:     F. Georges - H2O Consulting                                 */
+/*  Author:     Adam Retter - Evolved Binary                                */
 /*  Date:       2010-11-15                                                  */
 /*  Tags:                                                                   */
 /*      Copyright (c) 2010-2013 Florent Georges (see end of file.)          */
+/*      Copyright (c) 2018 Adam Retter (see end of file.)                   */
 /* ------------------------------------------------------------------------ */
 
 
@@ -114,26 +116,71 @@ public class SemverTest
 
     @Test
     public void testCompareMajor() throws PackageException {
-        final Semver v1 = Semver.parse("1.0.0");
-        final Semver v2 = Semver.parse("2.0.0");
-
+        Semver v1 = Semver.parse("1.0.0");
+        Semver v2 = Semver.parse("2.0.0");
         assertEquals(0, v1.compareTo(v1));
         assertEquals(0, v2.compareTo(v2));
+        assertTrue(v1.compareTo(v2) < 0);
+        assertTrue(v2.compareTo(v1) > 0);
 
+        v1 = Semver.parse("1.0");
+        v2 = Semver.parse("2.0.0");
+        assertEquals(0, v1.compareTo(v1));
+        assertEquals(0, v2.compareTo(v2));
+        assertTrue(v1.compareTo(v2) < 0);
+        assertTrue(v2.compareTo(v1) > 0);
+
+        v1 = Semver.parse("1");
+        v2 = Semver.parse("2.0.0");
+        assertEquals(0, v1.compareTo(v1));
+        assertEquals(0, v2.compareTo(v2));
+        assertTrue(v1.compareTo(v2) < 0);
+        assertTrue(v2.compareTo(v1) > 0);
+
+        v1 = Semver.parse("1.0.0");
+        v2 = Semver.parse("2.0");
+        assertEquals(0, v1.compareTo(v1));
+        assertEquals(0, v2.compareTo(v2));
+        assertTrue(v1.compareTo(v2) < 0);
+        assertTrue(v2.compareTo(v1) > 0);
+
+        v1 = Semver.parse("1.0.0");
+        v2 = Semver.parse("2");
+        assertEquals(0, v1.compareTo(v1));
+        assertEquals(0, v2.compareTo(v2));
         assertTrue(v1.compareTo(v2) < 0);
         assertTrue(v2.compareTo(v1) > 0);
     }
 
     @Test
     public void testCompareMinor() throws PackageException {
-        final Semver v01 = Semver.parse("0.1.0");
-        final Semver v02 = Semver.parse("0.2.0");
-
+        Semver v01 = Semver.parse("0.1.0");
+        Semver v02 = Semver.parse("0.2.0");
         assertEquals(0, v01.compareTo(v01));
         assertEquals(0, v02.compareTo(v02));
-
         assertTrue(v01.compareTo(v02) < 0);
         assertTrue(v02.compareTo(v01) > 0);
+
+        v01 = Semver.parse("0.1");
+        v02 = Semver.parse("0.2.0");
+        assertEquals(0, v01.compareTo(v01));
+        assertEquals(0, v02.compareTo(v02));
+        assertTrue(v01.compareTo(v02) < 0);
+        assertTrue(v02.compareTo(v01) > 0);
+
+        v01 = Semver.parse("0.1.0");
+        v02 = Semver.parse("0.2");
+        assertEquals(0, v01.compareTo(v01));
+        assertEquals(0, v02.compareTo(v02));
+        assertTrue(v01.compareTo(v02) < 0);
+        assertTrue(v02.compareTo(v01) > 0);
+
+        final Semver v101 = Semver.parse("1.0.1");
+        final Semver v1 = Semver.parse("1");
+        assertEquals(0, v101.compareTo(v101));
+        assertEquals(0, v1.compareTo(v1));
+        assertTrue(v101.compareTo(v1) > 0);
+        assertTrue(v1.compareTo(v101) < 0);
     }
 
     @Test
@@ -146,6 +193,13 @@ public class SemverTest
 
         assertTrue(v001.compareTo(v002) < 0);
         assertTrue(v002.compareTo(v001) > 0);
+
+        final Semver v101 = Semver.parse("1.0.1");
+        final Semver v10 = Semver.parse("1.0");
+        assertEquals(0, v101.compareTo(v101));
+        assertEquals(0, v10.compareTo(v10));
+        assertTrue(v101.compareTo(v10) > 0);
+        assertTrue(v10.compareTo(v101) < 0);
     }
 
     @Test
@@ -155,10 +209,8 @@ public class SemverTest
 
         assertEquals(0, v123_Snapshot.compareTo(v123_Snapshot));
         assertEquals(0, v123.compareTo(v123));
-
         assertTrue(v123_Snapshot.compareTo(v123) < 0);
         assertTrue(v123.compareTo(v123_Snapshot) > 0);
-
 
         final Semver v123_RC1 = Semver.parse("1.2.3-RC1");
         final Semver v123_RC2 = Semver.parse("1.2.3-RC2");
@@ -188,6 +240,20 @@ public class SemverTest
         assertTrue(v123_dRC11.compareTo(v123_dRC1) > 0);
         assertTrue(v123_dRC11.compareTo(v123_dRC2) < 0);
         assertTrue(v123_dRC2.compareTo(v123_dRC11) > 0);
+
+        Semver v101_snapshot = Semver.parse("1.0.1-SNAPSHOT");
+        final Semver v10 = Semver.parse("1.0");
+        assertEquals(0, v101_snapshot.compareTo(v101_snapshot));
+        assertEquals(0, v10.compareTo(v10));
+        assertTrue(v101_snapshot.compareTo(v10) > 0);
+        assertTrue(v10.compareTo(v101_snapshot) < 0);
+
+        v101_snapshot = Semver.parse("1.0.1-SNAPSHOT");
+        final Semver v101 = Semver.parse("1.0.1");
+        assertEquals(0, v101_snapshot.compareTo(v101_snapshot));
+        assertEquals(0, v101.compareTo(v101));
+        assertTrue(v101_snapshot.compareTo(v101) < 0);
+        assertTrue(v101.compareTo(v101_snapshot) > 0);
     }
 
     @Test
@@ -200,6 +266,20 @@ public class SemverTest
         assertEquals(0, v123_b2017.compareTo(v123));
         assertEquals(0, v123_b2017.compareTo(v123_b2018));
         assertEquals(0, v123_b2018.compareTo(v123_b2017));
+
+        Semver v100_2019 = Semver.parse("1.0.0+1019");
+        final Semver v101 = Semver.parse("1.0.1");
+        assertEquals(0, v100_2019.compareTo(v100_2019));
+        assertEquals(0, v101.compareTo(v101));
+        assertTrue(v100_2019.compareTo(v101) < 0);
+        assertTrue(v101.compareTo(v100_2019) > 0);
+
+        v100_2019 = Semver.parse("1.0.0+2019");
+        final Semver v100 = Semver.parse("1.0.0");
+        assertEquals(0, v100_2019.compareTo(v100_2019));
+        assertEquals(0, v100.compareTo(v100));
+        assertEquals(0, v100_2019.compareTo(v100));
+        assertEquals(0, v100.compareTo(v100_2019));
     }
 
     @Test

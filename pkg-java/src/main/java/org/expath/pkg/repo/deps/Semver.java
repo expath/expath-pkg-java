@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 
 import org.expath.pkg.repo.PackageException;
 
+import javax.annotation.Nullable;
+
 /**
  * Represents a SemVer template, or a SemVer version number.
  *
@@ -129,8 +131,7 @@ public class Semver implements Comparable<Semver> {
      */
     public boolean matches(final Semver rhs)
             throws PackageException {
-
-        return compareTo(rhs) == 0;
+        return matchesTemplate(rhs) == 0;
     }
 
     /**
@@ -146,7 +147,7 @@ public class Semver implements Comparable<Semver> {
      */
     public boolean matchesMin(final Semver rhs)
             throws PackageException {
-        return compareTo(rhs) <= 0;
+        return matchesTemplate(rhs) <= 0;
     }
 
     /**
@@ -162,11 +163,66 @@ public class Semver implements Comparable<Semver> {
      */
     public boolean matchesMax(final Semver rhs)
             throws PackageException {
-        return compareTo(rhs) >= 0;
+        return matchesTemplate(rhs) >= 0;
     }
 
     @Override
     public int compareTo(final Semver other) {
+        final int majorDiff = this.majorVersion - other.majorVersion;
+        if (majorDiff != 0) {
+            return majorDiff * 1000;
+        }
+
+        final int minorDiff = toInt(this.minorVersion) - toInt(other.minorVersion);
+        if (minorDiff != 0) {
+            return minorDiff * 100;
+        }
+
+        final int patchDiff = toInt(this.patchVersion) - toInt(other.patchVersion);
+        if (patchDiff != 0) {
+            return patchDiff * 10;
+        }
+
+        if (this.preReleaseVersion == null && other.preReleaseVersion == null) {
+            return 0;
+        } else if (this.preReleaseVersion == null) {
+            return 1;
+        } else if (other.preReleaseVersion == null) {
+            return -1;
+        }
+
+        // both have preReleaseVersion, need to compare them
+        final String[] preReleaseIdentfiers = this.preReleaseVersion.split("\\.");
+        final String[] otherPreReleaseIdentfiers = other.preReleaseVersion.split("\\.");
+        for(int i = 0; i < Math.min(preReleaseIdentfiers.length, otherPreReleaseIdentfiers.length); i++) {
+            final String preReleaseIdentfier = preReleaseIdentfiers[i];
+            final String otherPreReleaseIdentfier = otherPreReleaseIdentfiers[i];
+            final boolean preReleaseIdentfierIsNum = isNumeric(preReleaseIdentfier);
+            final boolean otherPreReleaseIdentfierIsNum = isNumeric(otherPreReleaseIdentfier);
+
+            if (preReleaseIdentfierIsNum && otherPreReleaseIdentfierIsNum) {
+                // both are numeric
+                final int preReleaseIdentifierDiff = Integer.parseInt(preReleaseIdentfier) - Integer.parseInt(otherPreReleaseIdentfier);
+                if (preReleaseIdentifierDiff != 0) {
+                    return preReleaseIdentifierDiff;
+                }
+            } else if (preReleaseIdentfierIsNum) {
+                return -1;
+            } else if (otherPreReleaseIdentfierIsNum) {
+                return 1;
+            } else {
+                // both are alphanumeric
+                final int preReleaseIdentifierDiff = preReleaseIdentfier.compareTo(otherPreReleaseIdentfier);
+                if (preReleaseIdentifierDiff != 0) {
+                    return preReleaseIdentifierDiff;
+                }
+            }
+        }
+
+        return preReleaseIdentfiers.length - otherPreReleaseIdentfiers.length;
+    }
+
+    private int matchesTemplate(final Semver other) {
         final int majorDiff = this.majorVersion - other.majorVersion;
         if (majorDiff != 0) {
             return majorDiff * 1000;
@@ -227,6 +283,20 @@ public class Semver implements Comparable<Semver> {
         }
 
         return preReleaseIdentfiers.length - otherPreReleaseIdentfiers.length;
+    }
+
+    /**
+     * Safely un-boxes an Integer which might be null.
+     *
+     * @param integer the Integer object or null
+     * @return 0 if the Integer is null, otherwise the int value of the Integer
+     */
+    private static int toInt(@Nullable final Integer integer) {
+        if (integer == null) {
+            return 0;
+        } else {
+            return integer;
+        }
     }
 
     private static boolean isNumeric(final String string) {
