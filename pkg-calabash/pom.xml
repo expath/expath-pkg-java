@@ -42,7 +42,7 @@
             <artifactId>xmlcalabash</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.thaiopensource</groupId>
+            <groupId>org.relaxng</groupId>
             <artifactId>jing</artifactId>
         </dependency>
         <dependency>

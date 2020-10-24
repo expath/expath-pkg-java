@@ -84,7 +84,7 @@ public class TestConfigProcessor
 
         XsltTransformer trans = exec.load();
         trans.setInitialTemplate(new QName("main"));
-        Serializer serial = new Serializer();
+        Serializer serial = proc.newSerializer();
         serial.setOutputStream(OUT);
         trans.setDestination(serial);
         trans.transform();
@@ -110,7 +110,7 @@ public class TestConfigProcessor
 
         XsltTransformer trans = exec.load();
         trans.setInitialTemplate(new QName("main"));
-        Serializer serial = new Serializer();
+        Serializer serial = proc.newSerializer();
         serial.setOutputStream(OUT);
         trans.setDestination(serial);
         trans.transform();
@@ -250,7 +250,7 @@ public class TestConfigProcessor
         XQueryExecutable exec = compiler.compile(new File(QUERY_STD));
 
         XQueryEvaluator eval = exec.load();
-        Serializer serial = new Serializer();
+        Serializer serial = proc.newSerializer();
         serial.setOutputStream(OUT);
         eval.evaluate();
         OUT.flush();
@@ -273,7 +273,7 @@ public class TestConfigProcessor
         XQueryExecutable exec = compiler.compile(new File(QUERY_STD));
 
         XQueryEvaluator eval = exec.load();
-        Serializer serial = new Serializer();
+        Serializer serial = proc.newSerializer();
         serial.setOutputStream(OUT);
         eval.evaluate();
         OUT.flush();

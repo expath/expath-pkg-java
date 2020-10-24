@@ -24,27 +24,18 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceReceiver;
 import net.sf.saxon.expr.PendingUpdateList;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.instruct.Debugger;
-import net.sf.saxon.expr.instruct.DocumentInstr;
-import net.sf.saxon.expr.instruct.ElementCreator;
-import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.expr.parser.PathMap.PathMapRoot;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.IntegratedFunctionLibrary;
-import net.sf.saxon.functions.VendorFunctionLibrary;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.serialize.charcode.CharacterSetFactory;
-import net.sf.saxon.trans.CompilerInfo;
-import net.sf.saxon.trans.DynamicLoader;
-import net.sf.saxon.trans.Mode;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaDeclaration;
@@ -208,15 +199,6 @@ public class ConfigurationProxy
     }
 
     @Override
-    public void setStripsWhiteSpace(int kind) {
-        if ( myConfig == null ) {
-            super.setStripsWhiteSpace(kind);
-            return;
-        }
-        myConfig.setStripsWhiteSpace(kind);
-    }
-
-    @Override
     public void setStripsAllWhiteSpace(boolean stripsAllWhiteSpace) {
         if ( myConfig == null ) {
             super.setStripsAllWhiteSpace(stripsAllWhiteSpace);
@@ -271,7 +253,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public void setProcessor(Object processor) {
+    public void setProcessor(ApiProvider processor) {
         if ( myConfig == null ) {
             super.setProcessor(processor);
             return;
@@ -547,11 +529,11 @@ public class ConfigurationProxy
     }
 
     @Override
-    public UserFunction newUserFunction(boolean memoFunction) {
+    public UserFunction newUserFunction(boolean memoFunction, FunctionStreamability streamability) {
         if ( myConfig == null ) {
-            return super.newUserFunction(memoFunction);
+            return super.newUserFunction(memoFunction, streamability);
         }
-        return myConfig.newUserFunction(memoFunction);
+        return myConfig.newUserFunction(memoFunction, streamability);
     }
 
     @Override
@@ -568,22 +550,6 @@ public class ConfigurationProxy
             return super.newPendingUpdateList();
         }
         return myConfig.newPendingUpdateList();
-    }
-
-    @Override
-    public NodeInfo makeUnconstructedElement(ElementCreator instr, XPathContext context) throws XPathException {
-        if ( myConfig == null ) {
-            return super.makeUnconstructedElement(instr, context);
-        }
-        return myConfig.makeUnconstructedElement(instr, context);
-    }
-
-    @Override
-    public NodeInfo makeUnconstructedDocument(DocumentInstr instr, XPathContext context) throws XPathException {
-        if ( myConfig == null ) {
-            return super.makeUnconstructedDocument(instr, context);
-        }
-        return myConfig.makeUnconstructedDocument(instr, context);
     }
 
     @Override
@@ -611,11 +577,11 @@ public class ConfigurationProxy
     }
 
     @Override
-    public Receiver makeStreamingTransformer(XPathContext context, Mode mode) throws XPathException {
+    public Receiver makeStreamingTransformer(XPathContext context, Mode mode, ParameterSet ordinaryParams, ParameterSet tunnelParams) throws XPathException {
         if ( myConfig == null ) {
-            return super.makeStreamingTransformer(context, mode);
+            return super.makeStreamingTransformer(context, mode, ordinaryParams, tunnelParams);
         }
-        return myConfig.makeStreamingTransformer(context, mode);
+        return myConfig.makeStreamingTransformer(context, mode, ordinaryParams, tunnelParams);
     }
 
     @Override
@@ -797,14 +763,6 @@ public class ConfigurationProxy
     }
 
     @Override
-    public VendorFunctionLibrary getVendorFunctionLibrary() {
-        if ( myConfig == null ) {
-            return super.getVendorFunctionLibrary();
-        }
-        return myConfig.getVendorFunctionLibrary();
-    }
-
-    @Override
     public URIResolver getURIResolver() {
         if ( myConfig == null ) {
             return super.getURIResolver();
@@ -842,14 +800,6 @@ public class ConfigurationProxy
             return super.getSystemURIResolver();
         }
         return myConfig.getSystemURIResolver();
-    }
-
-    @Override
-    public int getStripsWhiteSpace() {
-        if ( myConfig == null ) {
-            return super.getStripsWhiteSpace();
-        }
-        return myConfig.getStripsWhiteSpace();
     }
 
     @Override
@@ -925,7 +875,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public Object getProcessor() {
+    public ApiProvider getProcessor() {
         if ( myConfig == null ) {
             return super.getProcessor();
         }
@@ -1045,11 +995,11 @@ public class ConfigurationProxy
     }
 
     @Override
-    public SequenceReceiver getElementValidator(SequenceReceiver receiver, ParseOptions validationOptions, Location location) throws XPathException {
+    public Receiver getElementValidator(Receiver receiver, ParseOptions validationOptions, Location locationId) throws XPathException {
         if ( myConfig == null ) {
-            return super.getElementValidator(receiver, validationOptions, location);
+            return super.getElementValidator(receiver, validationOptions, locationId);
         }
-        return myConfig.getElementValidator(receiver, validationOptions, location);
+        return myConfig.getElementValidator(receiver, validationOptions, locationId);
     }
 
     @Override
@@ -1077,11 +1027,11 @@ public class ConfigurationProxy
     }
 
     @Override
-    public Receiver getDocumentValidator(Receiver receiver, String systemId, ParseOptions validationOptions) {
+    public Receiver getDocumentValidator(Receiver receiver, String systemId, ParseOptions validationOptions, Location initiatingLocation) {
         if ( myConfig == null ) {
-            return super.getDocumentValidator(receiver, systemId, validationOptions);
+            return super.getDocumentValidator(receiver, systemId, validationOptions, initiatingLocation);
         }
-        return myConfig.getDocumentValidator(receiver, systemId, validationOptions);
+        return myConfig.getDocumentValidator(receiver, systemId, validationOptions, initiatingLocation);
     }
 
     @Override

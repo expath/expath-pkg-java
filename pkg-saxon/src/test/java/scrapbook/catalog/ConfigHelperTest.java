@@ -79,7 +79,7 @@ public class ConfigHelperTest
         // actually evaluate
         XsltTransformer trans = exec.load();
         trans.setInitialTemplate(new QName("main"));
-        Serializer out = new Serializer(OUT);
+        Serializer out = proc.newSerializer(OUT);
         trans.setDestination(out);
         trans.transform();
     }
@@ -104,7 +104,7 @@ public class ConfigHelperTest
         XQueryExecutable exec = compiler.compile(getResource(XQUERY_NAME));
         // actually evaluate
         XQueryEvaluator eval = exec.load();
-        Serializer out = new Serializer(OUT);
+        Serializer out = proc.newSerializer(OUT);
         eval.run(out);
     }
 
