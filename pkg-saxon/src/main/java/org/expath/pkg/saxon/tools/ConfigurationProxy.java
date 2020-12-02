@@ -15,25 +15,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import javax.xml.transform.ErrorListener;
+import java.util.function.Function;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.URIResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.FilterFactory;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.PendingUpdateList;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.*;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.expr.parser.PathMap.PathMapRoot;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.IntegratedFunctionLibrary;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.StaticQueryContext;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.CharacterSetFactory;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
@@ -199,15 +200,6 @@ public class ConfigurationProxy
     }
 
     @Override
-    public void setStripsAllWhiteSpace(boolean stripsAllWhiteSpace) {
-        if ( myConfig == null ) {
-            super.setStripsAllWhiteSpace(stripsAllWhiteSpace);
-            return;
-        }
-        myConfig.setStripsAllWhiteSpace(stripsAllWhiteSpace);
-    }
-
-    @Override
     public void setSourceResolver(SourceResolver resolver) {
         if ( myConfig == null ) {
             super.setSourceResolver(resolver);
@@ -241,15 +233,6 @@ public class ConfigurationProxy
             return;
         }
         myConfig.setSchemaValidationMode(validationMode);
-    }
-
-    @Override
-    public void setRecoveryPolicy(int recoveryPolicy) {
-        if ( myConfig == null ) {
-            super.setRecoveryPolicy(recoveryPolicy);
-            return;
-        }
-        myConfig.setRecoveryPolicy(recoveryPolicy);
     }
 
     @Override
@@ -343,12 +326,12 @@ public class ConfigurationProxy
     }
 
     @Override
-    public void setErrorListener(ErrorListener listener) {
+    public void setErrorReporterFactory(final Function<Configuration, ? extends ErrorReporter> factory) {
         if ( myConfig == null ) {
-            super.setErrorListener(listener);
+            super.setErrorReporterFactory(factory);
             return;
         }
-        myConfig.setErrorListener(listener);
+        myConfig.setErrorReporterFactory(factory);
     }
 
     @Override
@@ -433,12 +416,12 @@ public class ConfigurationProxy
     }
 
     @Override
-    public void setCollectionURIResolver(CollectionURIResolver resolver) {
+    public void setCollectionFinder(final CollectionFinder cf) {
         if ( myConfig == null ) {
-            super.setCollectionURIResolver(resolver);
+            super.setCollectionFinder(cf);
             return;
         }
-        myConfig.setCollectionURIResolver(resolver);
+        myConfig.setCollectionFinder(cf);
     }
 
     @Override
@@ -521,11 +504,11 @@ public class ConfigurationProxy
     }
 
     @Override
-    public String readInlineSchema(NodeInfo root, String expected, ErrorListener errorListener) throws SchemaException {
+    public String readInlineSchema(NodeInfo root, String expected, ErrorReporter errorReporter) throws SchemaException {
         if ( myConfig == null ) {
-            return super.readInlineSchema(root, expected, errorListener);
+            return super.readInlineSchema(root, expected, errorReporter);
         }
-        return myConfig.readInlineSchema(root, expected, errorListener);
+        return myConfig.readInlineSchema(root, expected, errorReporter);
     }
 
     @Override
@@ -577,11 +560,11 @@ public class ConfigurationProxy
     }
 
     @Override
-    public Receiver makeStreamingTransformer(XPathContext context, Mode mode, ParameterSet ordinaryParams, ParameterSet tunnelParams) throws XPathException {
+    public Receiver makeStreamingTransformer(Mode mode, ParameterSet ordinaryParams, ParameterSet tunnelParams, Outputter output, XPathContext context) throws XPathException {
         if ( myConfig == null ) {
-            return super.makeStreamingTransformer(context, mode, ordinaryParams, tunnelParams);
+            return super.makeStreamingTransformer(mode, ordinaryParams, tunnelParams, output, context);
         }
-        return myConfig.makeStreamingTransformer(context, mode, ordinaryParams, tunnelParams);
+        return myConfig.makeStreamingTransformer(mode, ordinaryParams, tunnelParams, output, context);
     }
 
     @Override
@@ -859,14 +842,6 @@ public class ConfigurationProxy
     }
 
     @Override
-    public int getRecoveryPolicy() {
-        if ( myConfig == null ) {
-            return super.getRecoveryPolicy();
-        }
-        return myConfig.getRecoveryPolicy();
-    }
-
-    @Override
     public String getProductTitle() {
         if ( myConfig == null ) {
             return super.getProductTitle();
@@ -1115,11 +1090,11 @@ public class ConfigurationProxy
     }
 
     @Override
-    public CollectionURIResolver getCollectionURIResolver() {
+    public CollectionFinder getCollectionFinder() {
         if ( myConfig == null ) {
-            return super.getCollectionURIResolver();
+            return super.getCollectionFinder();
         }
-        return myConfig.getCollectionURIResolver();
+        return myConfig.getCollectionFinder();
     }
 
     @Override
@@ -1190,28 +1165,28 @@ public class ConfigurationProxy
     }
 
     @Override
-    public DocumentInfo buildDocument(Source source, ParseOptions parseOptions) throws XPathException {
+    public TreeInfo buildDocumentTree(Source source) throws XPathException {
         if ( myConfig == null ) {
-            return super.buildDocument(source, parseOptions);
+            return super.buildDocumentTree(source);
         }
-        return myConfig.buildDocument(source, parseOptions);
+        return myConfig.buildDocumentTree(source);
     }
 
     @Override
-    public DocumentInfo buildDocument(Source source) throws XPathException {
+    public TreeInfo buildDocumentTree(Source source, ParseOptions parseOptions) throws XPathException {
         if ( myConfig == null ) {
-            return super.buildDocument(source);
+            return super.buildDocumentTree(source, parseOptions);
         }
-        return myConfig.buildDocument(source);
+        return myConfig.buildDocumentTree(source, parseOptions);
     }
 
     @Override
-    public void addSchemaSource(Source schemaSource, ErrorListener errorListener) throws SchemaException {
+    public void addSchemaSource(final Source schemaSource, final ErrorReporter errorReporter) throws SchemaException {
         if ( myConfig == null ) {
-            super.addSchemaSource(schemaSource, errorListener);
+            super.addSchemaSource(schemaSource, errorReporter);
             return;
         }
-        myConfig.addSchemaSource(schemaSource, errorListener);
+        myConfig.addSchemaSource(schemaSource, errorReporter);
     }
 
     @Override
