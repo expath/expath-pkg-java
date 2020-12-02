@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.com/expath/expath-pkg-java.png?branch=master)](https://travis-ci.com/expath/expath-pkg-java)
 [![Build status](https://ci.appveyor.com/api/projects/status/jb816i3e4fh8wob3/branch/master?svg=true)](https://ci.appveyor.com/project/AdamRetter/expath-pkg-java/branch/master)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.expath.packaging/pkg/badge.svg)](https://search.maven.org/search?q=g:org.expath.packaging)
+[![Maven Central](https://img.shields.io/maven-central/v/org.expath.packaging/pkg.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22org.expath.packaging%22%20AND%20a:%22pkg%22)
+[![License](https://img.shields.io/badge/license-MPL%201.0-blue.svg)](https://opensource.org/licenses/MPL-1.0)
 
 # EXPath Packaging for Java
 
