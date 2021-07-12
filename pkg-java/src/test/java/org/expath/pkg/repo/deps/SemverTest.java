@@ -319,6 +319,33 @@ public class SemverTest
     }
 
     @Test
+    public void testMatchesMin_3_1() throws PackageException
+    {
+        Semver template = Semver.parse("6");
+        Semver version = Semver.parse("5.3.0");
+        boolean result = template.matchesMin(version);
+        assertFalse("the version does not match the template as minimum", result);
+    }
+
+    @Test
+    public void testMatchesMin_3_2() throws PackageException
+    {
+        Semver template = Semver.parse("5");
+        Semver version = Semver.parse("5.999.999");
+        boolean result = template.matchesMin(version);
+        assertTrue("the version matches the template as minimum", result);
+    }
+
+    @Test
+    public void testMatchesMin_3_3() throws PackageException
+    {
+        Semver template = Semver.parse("2.3");
+        Semver version = Semver.parse("2.3.0");
+        boolean result = template.matchesMin(version);
+        assertTrue("the version matches the template as minimum", result);
+    }
+
+    @Test
     public void testMatchesMin_4() throws PackageException
     {
         Semver template = Semver.parse("1.2.3-alpha");
