@@ -11,6 +11,8 @@ package org.expath.pkg.repo;
 
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.List;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -31,6 +33,8 @@ public class RepositoryTest
     {
         Storage storage = new FileSystemStorage(Paths.get("target/test-classes/repos/simple"));
         Repository sut = new Repository(storage);
+        final List<PackageException> exceptions = sut.init();
+        assertEquals(0, exceptions.size());
         Collection<Packages> packages_list = sut.listPackages();
         assertEquals("number of packages", 1, packages_list.size());
         Packages packages = packages_list.iterator().next();

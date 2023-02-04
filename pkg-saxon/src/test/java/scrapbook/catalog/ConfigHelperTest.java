@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -42,7 +43,10 @@ import org.expath.pkg.repo.PackageException;
 import org.expath.pkg.repo.Storage;
 import org.expath.pkg.saxon.ConfigHelper;
 import org.expath.pkg.saxon.SaxonRepository;
+import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test the repo configuration of the several Saxon invocation mechanisms.
@@ -51,11 +55,14 @@ import org.junit.Test;
  */
 public class ConfigHelperTest
 {
-    public ConfigHelperTest()
+    @Before
+    public void setup()
             throws PackageException
     {
         Storage storage = new FileSystemStorage(new File("target/test-classes/transform/repo").toPath());
-        REPO = new SaxonRepository(storage);
+        repo = new SaxonRepository(storage);
+        List<PackageException> exceptions = repo.init();
+        assertEquals(0, exceptions.size());
     }
 
     // Using S9api Processor.
@@ -68,7 +75,7 @@ public class ConfigHelperTest
         // the config object
         Configuration config = new Configuration();
         // configure the config object for Packaging System
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(config);
         // the processor
         Processor proc = new Processor(config);
@@ -95,7 +102,7 @@ public class ConfigHelperTest
         // the config object
         Configuration config = new Configuration();
         // configure the config object for Packaging System
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(config);
         // the processor
         Processor proc = new Processor(config);
@@ -117,7 +124,7 @@ public class ConfigHelperTest
         // the factory
         TransformerFactoryImpl factory = new TransformerFactoryImpl();
         // configure the factory for Packaging System
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(factory.getConfiguration());
         // compiling
         Source style = new StreamSource(getResource(XSLT_NAME));
@@ -140,7 +147,7 @@ public class ConfigHelperTest
         // the config object
         Configuration config = new Configuration();
         // configure the config object for Packaging System
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(config);
         // compiling
         StaticQueryContext ctxt = config.newStaticQueryContext();
@@ -157,7 +164,7 @@ public class ConfigHelperTest
         return loader.getResourceAsStream(resource);
     }
 
-    private final SaxonRepository REPO;
+    private SaxonRepository repo = null;
 //    private static final String XSLT_NAME = "scrapbook/catalog/http-test.xsl";
 //    private static final String XQUERY_NAME = "scrapbook/catalog/http-test.xq";
     private static final String XSLT_NAME = "transform/style.xsl";

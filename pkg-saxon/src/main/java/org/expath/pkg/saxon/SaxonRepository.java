@@ -12,7 +12,9 @@ package org.expath.pkg.saxon;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.xml.transform.Source;
 import javax.xml.transform.URIResolver;
@@ -35,17 +37,32 @@ import org.slf4j.LoggerFactory;
  */
 public class SaxonRepository
 {
-    public SaxonRepository(Storage storage)
-            throws PackageException
+    public SaxonRepository(final Storage storage)
     {
         this(new Repository(storage));
     }
 
-    public SaxonRepository(Repository parent)
-            throws PackageException
+    public SaxonRepository(final Repository parent)
     {
         myParent = parent;
-        parent.registerExtension(new SaxonPkgExtension());
+    }
+
+    /**
+     * Initialise the repository.
+     *
+     * @return any package exceptions that occur whilst trying to find the packages.
+     */
+    public List<PackageException> init() {
+        final List<PackageException> exceptions = new ArrayList<>();
+        exceptions.addAll(myParent.init());
+
+        try {
+            myParent.registerExtension(new SaxonPkgExtension());
+        } catch (final PackageException e) {
+            exceptions.add(e);
+        }
+
+        return exceptions;
     }
 
     public Repository getUnderlyingRepo()

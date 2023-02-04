@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import org.junit.Test;
@@ -169,6 +170,8 @@ public class UniverseTest
     {
         // the fixture
         Repository repo = getRepository("deps-1");
+        final List<PackageException> exceptions = repo.init();
+        assertEquals(0, exceptions.size());
         // the sut
         Package sut = latestPackage(repo, APP_PKG_NAME);
         // do it
@@ -183,6 +186,8 @@ public class UniverseTest
     {
         // the fixture
         Repository repo = getRepository("deps-1");
+        final List<PackageException> exceptions = repo.init();
+        assertEquals(0, exceptions.size());
         // the sut
         Packages sut = repo.getPackages(LIB_Y_PKG_NAME);
         // do it
@@ -197,6 +202,8 @@ public class UniverseTest
     {
         // the fixture
         Repository repo = getRepository("deps-1");
+        final List<PackageException> exceptions = repo.init();
+        assertEquals(0, exceptions.size());
         // the sut
         Package sut = latestPackage(repo, APP_PKG_NAME);
         // do it
@@ -211,6 +218,8 @@ public class UniverseTest
     {
         // the fixture
         Repository repo = getRepository("deps-1");
+        final List<PackageException> exceptions = repo.init();
+        assertEquals(0, exceptions.size());
         // the sut
         Packages sut = repo.getPackages(APP_PKG_NAME);
         // do it
@@ -225,6 +234,8 @@ public class UniverseTest
     {
         // the fixture
         Repository repo = getRepository("deps-1");
+        final List<PackageException> exceptions = repo.init();
+        assertEquals(0, exceptions.size());
         // the sut
         Package sut = latestPackage(repo, APP_PKG_NAME);
         // do it
@@ -239,6 +250,8 @@ public class UniverseTest
     {
         // the fixture
         Repository repo = getRepository("deps-1");
+        final List<PackageException> exceptions = repo.init();
+        assertEquals(0, exceptions.size());
         // the sut
         Packages sut = repo.getPackages(APP_PKG_NAME);
         // do it
@@ -253,6 +266,8 @@ public class UniverseTest
     {
         // the sut
         Repository sut = getRepository("deps-1");
+        final List<PackageException> exceptions = sut.init();
+        assertEquals(0, exceptions.size());
         // do it
         Source src = sut.resolve("http://example.org/lib-b/query", URISpace.XQUERY);
         // assertions

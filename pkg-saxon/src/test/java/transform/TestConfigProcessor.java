@@ -16,6 +16,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.util.List;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -50,7 +51,10 @@ import org.expath.pkg.repo.PackageException;
 import org.expath.pkg.repo.Storage;
 import org.expath.pkg.saxon.ConfigHelper;
 import org.expath.pkg.saxon.SaxonRepository;
+import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * ...
@@ -59,11 +63,14 @@ import org.junit.Test;
  */
 public class TestConfigProcessor
 {
-    public TestConfigProcessor()
+    @Before
+    public void setup()
             throws PackageException
     {
         Storage storage = new FileSystemStorage(new File("target/test-classes/transform/repo").toPath());
-        REPO = new SaxonRepository(storage);
+        repo = new SaxonRepository(storage);
+        final List<PackageException> exceptions = repo.init();
+        assertEquals(0, exceptions.size());
     }
 
     @Test(
@@ -101,7 +108,7 @@ public class TestConfigProcessor
     {
         System.err.println("configProcessor_successful");
         Processor proc = new Processor(false);
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(proc.getUnderlyingConfiguration());
 
         XsltCompiler compiler = proc.newXsltCompiler();
@@ -145,7 +152,7 @@ public class TestConfigProcessor
     {
         System.err.println("configFactory_successful");
         TransformerFactoryImpl factory = new TransformerFactoryImpl();
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(factory.getConfiguration());
 
         Source style = new StreamSource(STYLE_STD);
@@ -184,7 +191,7 @@ public class TestConfigProcessor
     {
         System.err.println("configConfiguration_successful");
         Configuration config = new Configuration();
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(config);
 
         TransformerFactoryImpl factory = new TransformerFactoryImpl(config);
@@ -224,7 +231,7 @@ public class TestConfigProcessor
     {
         System.err.println("usingJava_successful");
         Configuration config = new Configuration();
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(config);
 
         TransformerFactoryImpl factory = new TransformerFactoryImpl(config);
@@ -266,7 +273,7 @@ public class TestConfigProcessor
     {
         System.err.println("queryProcessor_successful");
         Processor proc = new Processor(false);
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(proc.getUnderlyingConfiguration());
 
         XQueryCompiler compiler = proc.newXQueryCompiler();
@@ -309,7 +316,7 @@ public class TestConfigProcessor
     {
         System.err.println("queryConfiguration_successful");
         Configuration config = new Configuration();
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(config);
 
         StaticQueryContext static_ctxt = config.newStaticQueryContext();
@@ -350,7 +357,7 @@ public class TestConfigProcessor
     {
         System.err.println("queryUsingJava_successful");
         Configuration config = new Configuration();
-        ConfigHelper helper = new ConfigHelper(REPO);
+        ConfigHelper helper = new ConfigHelper(repo);
         helper.config(config);
 
         StaticQueryContext static_ctxt = config.newStaticQueryContext();
@@ -404,7 +411,7 @@ public class TestConfigProcessor
 //        System.out.flush();
 //    }
 
-    private SaxonRepository REPO;
+    private SaxonRepository repo;
     private static final String STYLE_STD  = "target/test-classes/transform/style.xsl";
     private static final String STYLE_JAVA = "target/test-classes/transform/using-java.xsl";
     private static final String QUERY_STD  = "target/test-classes/transform/query.xq";

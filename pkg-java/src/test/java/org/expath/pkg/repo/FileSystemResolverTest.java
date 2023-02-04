@@ -12,9 +12,13 @@ package org.expath.pkg.repo;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link FileSystemStorage.FileSystemResolver}.
@@ -31,6 +35,8 @@ public class FileSystemResolverTest
         Path repodir = Paths.get("target/test-classes/repos/simple");
         Storage storage = new FileSystemStorage(repodir);
         Repository repo = new Repository(storage);
+        final List<PackageException> exceptions = repo.init();
+        assertEquals(0, exceptions.size());
         // get the pkg
         Packages packages = repo.getPackages("http://www.example.org/lib/hello");
         Package pkg = packages.latest();
@@ -41,9 +47,9 @@ public class FileSystemResolverTest
         URI repouri  = repodir.toUri();
         URI expected = repouri.resolve("hello-1.1.1/hello/");
         URI actual   = resolver.getContentDirBaseURI();
-        Assert.assertEquals("base URI scheme is file:", "file", actual.getScheme());
-        Assert.assertTrue("base URI is absolute", actual.isAbsolute());
-        Assert.assertEquals("base URI value", expected, actual);
+        assertEquals("base URI scheme is file:", "file", actual.getScheme());
+        assertTrue("base URI is absolute", actual.isAbsolute());
+        assertEquals("base URI value", expected, actual);
     }
 }
 

@@ -16,11 +16,15 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import javax.annotation.Nullable;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import org.expath.pkg.repo.Storage.PackageResolver;
@@ -46,20 +50,55 @@ import org.slf4j.LoggerFactory;
 public class Repository
         implements Universe
 {
-    public Repository(Storage storage)
-            throws PackageException
+    public Repository(final Storage storage)
     {
         LOG.info("Create a new repository with storage: {}", storage);
-        myStorage    = storage;
-        myPackages   = new HashMap<String, Packages>();
-        myExtensions = new HashMap<String, Extension>();
-        // dynamically register extensions from the classpath
-        ServiceLoader<Extension> loader = ServiceLoader.load(Extension.class);
-        for ( Extension e : loader ) {
-            registerExtension(e);
+        this.myStorage    = storage;
+    }
+
+    /**
+     * Initialise the repository.
+     *
+     * @return any package exceptions that occur whilst trying to find the packages.
+     */
+    public List<PackageException> init() {
+        List<PackageException> exceptions = loadExtensions();
+        final List<PackageException> parseExceptions = parsePublicUris();
+        if (parseExceptions != Collections.<PackageException>emptyList()) {
+            if (exceptions == Collections.<PackageException>emptyList()) {
+                return parseExceptions;
+            } else {
+                exceptions.addAll(parseExceptions);
+            }
         }
-        // TODO: Enable lazy initialization...
-        parsePublicUris();
+        return exceptions;
+    }
+
+    /**
+     * Load the extensions.
+     *
+     * @return any package exceptions that occur whilst trying to load extensions.
+     */
+    private List<PackageException> loadExtensions() {
+        @Nullable List<PackageException> exceptions = null;
+
+        final ServiceLoader<Extension> loader = ServiceLoader.load(Extension.class);
+        for (final Extension extension : loader) {
+            try {
+                registerExtension(extension);
+            } catch (final PackageException e) {
+                if (exceptions == null) {
+                    exceptions = new ArrayList<>();
+                }
+                exceptions.add(e);
+            }
+        }
+
+        if (exceptions != null) {
+            return exceptions;
+        }
+
+        return Collections.emptyList();
     }
 
     /**
@@ -128,10 +167,10 @@ public class Repository
      *
      * @throws PackageException if an error occurs
      */
-    final public void registerExtension(Extension ext)
+    final public void registerExtension(final Extension ext)
             throws PackageException
     {
-        if ( ! myExtensions.containsKey(ext.getName()) ) {
+        if (!myExtensions.containsKey(ext.getName())) {
             myExtensions.put(ext.getName(), ext);
             ext.init(this, myPackages);
         }
@@ -140,14 +179,12 @@ public class Repository
     /**
      * Reload the repository configuration, so parse again the package descriptors.
      *
-     * @throws PackageException if an error occurs
+     * @return any package exceptions that occur whilst trying to find the packages.
      */
-    public synchronized void reload()
-            throws PackageException
+    public synchronized List<PackageException> reload()
     {
-        // TODO: Reload extensions as well?
-        myPackages = new HashMap<String, Packages>();
-        parsePublicUris();
+        myPackages.clear();
+        return parsePublicUris();
     }
 
     /**
@@ -479,35 +516,56 @@ public class Repository
     }
 
     /**
-     * ...
+     * Load package descriptors from public URIs.
+     *
+     * @return any package exceptions that occur whilst trying to find the packages.
      */
-    private synchronized void parsePublicUris()
-            throws PackageException
+    private synchronized List<PackageException> parsePublicUris()
     {
+        @Nullable List<PackageException> exceptions = null;
+
         // the list of package dirs
-        Set<String> packages = myStorage.listPackageDirectories();
+        final Set<String> packages;
+        try {
+            packages = myStorage.listPackageDirectories();
+        } catch (final PackageException e) {
+            exceptions = new ArrayList<>();
+            exceptions.add(e);
+            return exceptions;
+        }
+
         // the parser
-        DescriptorParser parser = new DescriptorParser();
+        final DescriptorParser parser = new DescriptorParser();
+
         // loop over the packages
-        for ( String p : packages ) {
-            PackageResolver res = myStorage.makePackageResolver(p, null);
-            Source desc;
+        for (final String p : packages) {
             try {
-                desc = res.resolveResource("expath-pkg.xml");
-            }
-            catch ( Storage.NotExistException ex ) {
-                throw new PackageException("Package descriptor does NOT exist in: " + p, ex);
-            }
-            try {
-                Package pkg = parser.parse(desc, p, myStorage, this);
+                final PackageResolver res = myStorage.makePackageResolver(p, null);
+                final Source desc = res.resolveResource("expath-pkg.xml");
+                final Package pkg = parser.parse(desc, p, myStorage, this);
                 addPackage(pkg);
-                for ( Extension ext : myExtensions.values() ) {
+
+                for (final Extension ext : myExtensions.values() ) {
                     ext.init(this, pkg);
                 }
-            } catch (PackageException e) {
-                // do not abort: package should be ignored
+            } catch (final Storage.NotExistException | PackageException e) {
+                if (exceptions == null) {
+                    exceptions = new ArrayList<>();
+                }
+
+                if (e instanceof Storage.NotExistException) {
+                    exceptions.add(new PackageException("Package descriptor does NOT exist in: " + p, e));
+                } else {
+                    exceptions.add((PackageException) e);
+                }
             }
         }
+
+        if (exceptions != null) {
+            return exceptions;
+        }
+
+        return Collections.emptyList();
     }
 
     /**
@@ -530,9 +588,7 @@ public class Repository
     Repository()
     {
         // nothing, packages will be added "by hand" in tests
-        myStorage    = null; // make javac happy, init the final variable
-        myPackages   = new HashMap<String, Packages>(); // init the variable, for addPackage()
-        myExtensions = new HashMap<String, Extension>();
+        myStorage    = null;
     }
 
     /**
@@ -542,11 +598,11 @@ public class Repository
     /**
      * The list of packages in this repository (indexed by name).
      */
-    private Map<String, Packages> myPackages;
+    private final Map<String, Packages> myPackages = new HashMap<>();
     /**
      * The registered extensions (indexed by name).
      */
-    private Map<String, Extension> myExtensions;
+    private final Map<String, Extension> myExtensions = new HashMap<>();
     /**
      * The logger.
      */
