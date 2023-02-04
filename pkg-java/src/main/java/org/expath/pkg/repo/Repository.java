@@ -24,9 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nullable;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
 import org.expath.pkg.repo.Storage.PackageResolver;
 import org.expath.pkg.repo.parser.DescriptorParser;
 import org.slf4j.Logger;
@@ -47,6 +52,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Florent Georges
  */
+@ThreadSafe
 public class Repository
         implements Universe
 {
@@ -170,9 +176,24 @@ public class Repository
     final public void registerExtension(final Extension ext)
             throws PackageException
     {
-        if (!myExtensions.containsKey(ext.getName())) {
-            myExtensions.put(ext.getName(), ext);
-            ext.init(this, myPackages);
+        boolean registeredExtension = false;
+        myExtensionsLock.writeLock().lock();
+        try {
+            if (!myExtensions.containsKey(ext.getName())) {
+                myExtensions.put(ext.getName(), ext);
+                registeredExtension = true;
+            }
+        } finally {
+            myExtensionsLock.writeLock().unlock();
+        }
+
+        if (registeredExtension) {
+            myPackagesLock.readLock().lock();
+            try {
+                ext.init(this, myPackages);
+            } finally {
+                myPackagesLock.readLock().unlock();
+            }
         }
     }
 
@@ -181,9 +202,14 @@ public class Repository
      *
      * @return any package exceptions that occur whilst trying to find the packages.
      */
-    public synchronized List<PackageException> reload()
+    public List<PackageException> reload()
     {
-        myPackages.clear();
+        myPackagesLock.writeLock().lock();
+        try {
+            myPackages.clear();
+        } finally {
+            myPackagesLock.writeLock().unlock();
+        }
         return parsePublicUris();
     }
 
@@ -199,12 +225,22 @@ public class Repository
 
     public Collection<Packages> listPackages()
     {
-        return myPackages.values();
+        myPackagesLock.readLock().lock();
+        try {
+            return myPackages.values();
+        } finally {
+            myPackagesLock.readLock().unlock();
+        }
     }
 
     public Packages getPackages(String name)
     {
-        return myPackages.get(name);
+        myPackagesLock.readLock().lock();
+        try {
+            return myPackages.get(name);
+        } finally {
+            myPackagesLock.readLock().unlock();
+        }
     }
 
     /**
@@ -335,21 +371,27 @@ public class Repository
         // is the package already in the repo?
         String name = pkg.getName();
         String version = pkg.getVersion();
-        Packages pp = myPackages.get(name);
-        if ( pp != null ) {
-            Package p2 = pp.version(version);
-            if ( p2 != null ) {
-                if ( force || interact.ask("Force override " + name + " - " + version + "?", false) ) {
-                    myStorage.remove(p2);
-                    pp.remove(p2);
-                    if ( pp.latest() == null ) {
-                        myPackages.remove(name);
+
+        @Nullable Packages pp = null;
+        myPackagesLock.writeLock().lock();
+        try {
+            pp = myPackages.get(name);
+            if (pp != null) {
+                Package p2 = pp.version(version);
+                if (p2 != null) {
+                    if (force || interact.ask("Force override " + name + " - " + version + "?", false)) {
+                        myStorage.remove(p2);
+                        pp.remove(p2);
+                        if (pp.latest() == null) {
+                            myPackages.remove(name);
+                        }
+                    } else {
+                        throw new AlreadyInstalledException(name, version);
                     }
                 }
-                else {
-                    throw new AlreadyInstalledException(name, version);
-                }
             }
+        } finally {
+            myPackagesLock.writeLock().unlock();
         }
 
         // where to move the temporary dir? (where within the repo)
@@ -365,14 +407,24 @@ public class Repository
         myStorage.storeInstallDir(tmp_dir, key, pkg);
         if ( pp == null ) {
             pp = new Packages(name);
-            myPackages.put(name, pp);
+            myPackagesLock.writeLock().lock();
+            try {
+                myPackages.put(name, pp);
+            } finally {
+                myPackagesLock.writeLock().unlock();
+            }
         }
         pp.add(pkg);
 
         myStorage.updatePackageLists(pkg);
 
-        for ( Extension ext : myExtensions.values() ) {
-            ext.install(this, pkg);
+        myExtensionsLock.readLock().lock();
+        try {
+            for (final Extension ext : myExtensions.values()) {
+                ext.install(this, pkg);
+            }
+        } finally {
+            myExtensionsLock.readLock().unlock();
         }
 
         return pkg;
@@ -406,21 +458,26 @@ public class Repository
             return false;
         }
         // delete the package content
-        Packages pp = myPackages.get(pkg);
-        if ( pp == null ) {
-            if ( force ) {
-                return false;
+        myPackagesLock.writeLock().lock();
+        try {
+            Packages pp = myPackages.get(pkg);
+            if (pp == null) {
+                if (force) {
+                    return false;
+                }
+                throw new PackageException("The package does not exist: " + pkg);
             }
-            throw new PackageException("The package does not exist: " + pkg);
+            if (pp.packages().size() != 1) {
+                throw new PackageException("The package has several versions installed: " + pkg);
+            }
+            Package p = pp.latest();
+            myStorage.remove(p);
+            pp.remove(p);
+            // remove the package from the list
+            myPackages.remove(pkg);
+        } finally {
+            myPackagesLock.writeLock().unlock();
         }
-        if ( pp.packages().size() != 1 ) {
-            throw new PackageException("The package has several versions installed: " + pkg);
-        }
-        Package p = pp.latest();
-        myStorage.remove(p);
-        pp.remove(p);
-        // remove the package from the list
-        myPackages.remove(pkg);
         return true;
     }
 
@@ -453,25 +510,30 @@ public class Repository
             return false;
         }
         // delete the package content
-        Packages pp = myPackages.get(pkg);
-        if ( pp == null ) {
-            if ( force ) {
-                return false;
+        myPackagesLock.writeLock().lock();
+        try {
+            Packages pp = myPackages.get(pkg);
+            if (pp == null) {
+                if (force) {
+                    return false;
+                }
+                throw new PackageException("The package does not exist: " + pkg);
             }
-            throw new PackageException("The package does not exist: " + pkg);
-        }
-        Package p = pp.version(version);
-        if ( p == null ) {
-            if ( force ) {
-                return false;
+            Package p = pp.version(version);
+            if (p == null) {
+                if (force) {
+                    return false;
+                }
+                throw new PackageException("The version " + version + " does not exist for the package: " + pkg);
             }
-            throw new PackageException("The version " + version + " does not exist for the package: " + pkg);
-        }
-        myStorage.remove(p);
-        pp.remove(p);
-        // remove the package from the list if it was the only version
-        if ( pp.latest() == null ) {
-            myPackages.remove(pkg);
+            myStorage.remove(p);
+            pp.remove(p);
+            // remove the package from the list if it was the only version
+            if (pp.latest() == null) {
+                myPackages.remove(pkg);
+            }
+        } finally {
+            myPackagesLock.writeLock().unlock();
         }
         return true;
     }
@@ -496,12 +558,17 @@ public class Repository
             throws PackageException
     {
         LOG.debug("Repository, resolve in {}: '{}'", space, href);
-        for ( Packages pp : myPackages.values() ) {
-            Package p = pp.latest();
-            Source src = p.resolve(href, space);
-            if ( src != null ) {
-                return src;
+        try {
+            myPackagesLock.readLock().lock();
+            for (final Packages pp : myPackages.values()) {
+                Package p = pp.latest();
+                Source src = p.resolve(href, space);
+                if (src != null) {
+                    return src;
+                }
             }
+        } finally {
+            myPackagesLock.readLock().unlock();
         }
         return null;
     }
@@ -520,7 +587,7 @@ public class Repository
      *
      * @return any package exceptions that occur whilst trying to find the packages.
      */
-    private synchronized List<PackageException> parsePublicUris()
+    private List<PackageException> parsePublicUris()
     {
         @Nullable List<PackageException> exceptions = null;
 
@@ -545,8 +612,13 @@ public class Repository
                 final Package pkg = parser.parse(desc, p, myStorage, this);
                 addPackage(pkg);
 
-                for (final Extension ext : myExtensions.values() ) {
-                    ext.init(this, pkg);
+                myExtensionsLock.readLock().lock();
+                try {
+                    for (final Extension ext : myExtensions.values()) {
+                        ext.init(this, pkg);
+                    }
+                } finally {
+                    myExtensionsLock.readLock().unlock();
                 }
             } catch (final Storage.NotExistException | PackageException e) {
                 if (exceptions == null) {
@@ -574,12 +646,17 @@ public class Repository
     void addPackage(Package pkg)
     {
         String name = pkg.getName();
-        Packages pp = myPackages.get(name);
-        if ( pp == null ) {
-            pp = new Packages(name);
-            myPackages.put(name, pp);
+        myPackagesLock.writeLock().lock();
+        try {
+            Packages pp = myPackages.get(name);
+            if (pp == null) {
+                pp = new Packages(name);
+                myPackages.put(name, pp);
+            }
+            pp.add(pkg);
+        } finally {
+            myPackagesLock.writeLock().unlock();
         }
-        pp.add(pkg);
     }
 
     /**
@@ -598,11 +675,13 @@ public class Repository
     /**
      * The list of packages in this repository (indexed by name).
      */
-    private final Map<String, Packages> myPackages = new HashMap<>();
+    @GuardedBy("myPackages") private final Map<String, Packages> myPackages = new HashMap<>();
+    private final ReadWriteLock myPackagesLock = new ReentrantReadWriteLock();
     /**
      * The registered extensions (indexed by name).
      */
-    private final Map<String, Extension> myExtensions = new HashMap<>();
+    @GuardedBy("myExtensionsLock") private final Map<String, Extension> myExtensions = new HashMap<>();
+    private final ReadWriteLock myExtensionsLock = new ReentrantReadWriteLock();
     /**
      * The logger.
      */
