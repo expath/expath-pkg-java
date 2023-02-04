@@ -87,7 +87,6 @@ public class PkgReadableDocument
 
     @Override
     public XdmNode read()
-            throws SaxonApiException
     {
         if ( ! myHasBeenRead ) {
             doRead();

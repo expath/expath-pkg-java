@@ -25,9 +25,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.QName;
-import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.type.BuiltInAtomicType;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -127,31 +131,30 @@ public class PkgReadableData
                 charset = user_charset;
             }
 
-            tree.addStartElement(wrapper);
+            final List<AttributeInfo> attributes = new ArrayList<>();
             if ( XProcConstants.c_data.equals(wrapper) ) {
                 if ( "content/unknown".equals(server_con_type) ) {
-                    tree.addAttribute(ReadableData._contentType, "application/octet-stream");
+                    attributes.add(new AttributeInfo(new NoNamespaceName(ReadableData._contentType.getLocalName()), BuiltInAtomicType.STRING, "application/octet-stream", null, 0));
                 }
                 else {
-                    tree.addAttribute(ReadableData._contentType, server_con_type);
+                    attributes.add(new AttributeInfo(new NoNamespaceName(ReadableData._contentType.getLocalName()), BuiltInAtomicType.STRING, server_con_type, null, 0));
                 }
                 if ( ! isText(server_con_type, charset) ) {
-                    tree.addAttribute(ReadableData._encoding, "base64");
+                    attributes.add(new AttributeInfo(new NoNamespaceName(ReadableData._encoding.getLocalName()), BuiltInAtomicType.STRING, "base64", null, 0));
                 }
             }
             else {
                 if ( "content/unknown".equals(server_con_type) ) {
-                    tree.addAttribute(ReadableData.c_contentType, "application/octet-stream");
+                    attributes.add(new AttributeInfo(new FingerprintedQName(ReadableData.c_contentType.getPrefix(), ReadableData.c_contentType.getNamespaceURI(), ReadableData.c_contentType.getLocalName()), BuiltInAtomicType.STRING, "application/octet-stream", null, 0));
                 }
                 else {
-                    tree.addAttribute(ReadableData.c_contentType, server_con_type);
+                    attributes.add(new AttributeInfo(new FingerprintedQName(ReadableData.c_contentType.getPrefix(), ReadableData.c_contentType.getNamespaceURI(), ReadableData.c_contentType.getLocalName()), BuiltInAtomicType.STRING, server_con_type, null, 0));
                 }
                 if ( ! isText(server_con_type, charset) ) {
-                    tree.addAttribute(ReadableData.c_encoding, "base64");
+                    attributes.add(new AttributeInfo(new FingerprintedQName(ReadableData.c_encoding.getPrefix(), ReadableData.c_encoding.getNamespaceURI(), ReadableData.c_encoding.getLocalName()), BuiltInAtomicType.STRING, "base64", null, 0));
                 }
             }
-            tree.startContent();
-
+            tree.addStartElement(wrapper, new SmallAttributeMap(attributes));
 
             if ( isText(server_con_type, charset) ) {
                 if ( charset == null ) {
@@ -252,7 +255,6 @@ public class PkgReadableData
 
     @Override
     public XdmNode read()
-            throws SaxonApiException
     {
         return myDocs.get(myPos++);
     }
