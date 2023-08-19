@@ -15,6 +15,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
+import javax.annotation.Nullable;
 import javax.xml.transform.stream.StreamSource;
 import org.expath.pkg.repo.tools.PackagesTxtFile;
 import org.expath.pkg.repo.tools.PackagesXmlFile;
@@ -181,7 +182,7 @@ public class FileSystemStorage
     public class FileSystemResolver
             extends PackageResolver
     {
-        public FileSystemResolver(Path pkg_dir, String abbrev, String rsrc_name)
+        public FileSystemResolver(@Nullable final Path pkg_dir, final String abbrev, final String rsrc_name)
                  throws PackageException
         {
             myPkgAbbrev = abbrev;
@@ -201,7 +202,7 @@ public class FileSystemStorage
             return myContentDir.toUri();
         }
 
-        private void setPkgDir(Path dir)
+        private void setPkgDir(@Nullable final Path dir)
                  throws PackageException
         {
             myPkgDir = dir;
@@ -301,11 +302,10 @@ public class FileSystemStorage
             }
             try {
                 final InputStream in = Files.newInputStream(f);
-                StreamSource src = new StreamSource(in);
+                final StreamSource src = new StreamSource(in);
                 src.setSystemId(f.toUri().toString());
                 return src;
-            }
-            catch ( IOException ex ) {
+            } catch (final IOException ex) {
                 String msg = "File '" + f + "' exists but is not found";
                 LOG.error(msg);
                 throw new PackageException(msg, ex);
@@ -319,8 +319,8 @@ public class FileSystemStorage
 
         private final String myRsrcName;
         private final String myPkgAbbrev;
-        private Path         myPkgDir;
-        private Path         myContentDir;
+        @Nullable private Path myPkgDir;
+        @Nullable private Path myContentDir;
     }
 }
 
