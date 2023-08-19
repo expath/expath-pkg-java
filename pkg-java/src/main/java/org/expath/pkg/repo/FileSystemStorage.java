@@ -279,27 +279,59 @@ public class FileSystemStorage
         }
 
         @Override
-        public StreamSource resolveComponent(String path)
-                throws PackageException
-                     , NotExistException
-        {
-            if ( myContentDir == null ) {
-                return null;
-            }
-            return resolveWithin(path, myContentDir);
-        }
+        public StreamSource resolveComponent(final String path) throws PackageException, NotExistException {
+            @Nullable StreamSource component = null;
 
-        private StreamSource resolveWithin(String path, Path dir)
-                throws PackageException
-                     , NotExistException
-        {
-            LOG.debug("Trying to resolve '{}' within '{}'", path, dir);
-            Path f = dir.resolve(path);
-            if ( ! Files.exists(f) ) {
-                String msg = "File '" + f + "' does not exist";
+            // first try the contentDir
+            if (myContentDir != null) {
+                component = tryResolveWithin(path, myContentDir);
+            }
+
+            if (component == null && myPkgDir != null) {
+                // fallback to trying the pkgDir
+                component = tryResolveWithin(path, myPkgDir);
+            }
+
+            if (component == null) {
+                // throw a NotExistException
+                final StringBuilder builder = new StringBuilder();
+                builder.append( "Could not locate component '").append(path).append("'");
+                if (myContentDir != null) {
+                    builder.append(" in: ").append(myContentDir.normalize().toAbsolutePath());
+                }
+                if (myPkgDir != null) {
+                    if (myContentDir != null) {
+                        builder.append(", or: ");
+                    } else {
+                        builder.append(" in: ");
+                    }
+                    builder.append(myPkgDir.normalize().toAbsolutePath());
+                }
+                final String msg = builder.toString();
                 LOG.debug(msg);
                 throw new NotExistException(msg);
             }
+
+            return component;
+        }
+
+        private StreamSource resolveWithin(final String path, final Path dir) throws PackageException, NotExistException {
+            @Nullable final StreamSource result = tryResolveWithin(path, dir);
+            if (result == null) {
+                final String msg = "File '" + dir.resolve(path) + "' does not exist";
+                LOG.debug(msg);
+                throw new NotExistException(msg);
+            }
+            return result;
+        }
+
+        private @Nullable StreamSource tryResolveWithin(final String path, final Path dir) throws PackageException {
+            LOG.debug("Trying to resolve '{}' within '{}'", path, dir);
+            final Path f = dir.resolve(path);
+            if (!Files.exists(f)) {
+                return null;
+            }
+
             try {
                 final InputStream in = Files.newInputStream(f);
                 final StreamSource src = new StreamSource(in);
