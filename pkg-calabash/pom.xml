@@ -70,10 +70,10 @@
 
     <repositories>
         <repository>
-            <!-- See https://github.com/ndw/xmlcalabash1/issues/228 -->
+            <!-- See https://github.com/ndw/xmlcalabash1/issues/351 -->
             <id>maven-restlet</id>
-            <name>Public online Restlet repository</name>
-            <url>https://maven.restlet.org</url>
+            <name>Restlet repository</name>
+            <url>https://maven.restlet.talend.com</url>
         </repository>
     </repositories>
 
