@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.expath.packaging</groupId>
         <artifactId>pkg-parent</artifactId>
-        <version>2.1.1</version>
+        <version>2.1.2-SNAPSHOT</version>
         <relativePath>../pkg-parent/pom.xml</relativePath>
     </parent>
 
@@ -19,7 +19,7 @@
         <connection>scm:git:https://github.com/expath/expath-pkg-java.git</connection>
         <developerConnection>scm:git:https://github.com/expath/expath-pkg-java.git</developerConnection>
         <url>scm:git:https://github.com/expath/expath-pkg-java.git</url>
-      <tag>pkg-2.1.1</tag>
+      <tag>HEAD</tag>
     </scm>
 
     <dependencies>
