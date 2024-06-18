@@ -13,7 +13,10 @@ package org.expath.pkg.saxon;
 import javax.xml.transform.URIResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
+import net.sf.saxon.lib.ChainedResourceResolver;
 import net.sf.saxon.lib.ModuleURIResolver;
+import net.sf.saxon.lib.ResourceResolver;
+import net.sf.saxon.lib.ResourceResolverWrappingURIResolver;
 import org.expath.pkg.repo.PackageException;
 import org.expath.pkg.repo.URISpace;
 
@@ -35,9 +38,14 @@ public class ConfigHelper
         // resolver for XQuery
         ModuleURIResolver xquery_resolver = myRepo.getModuleURIResolver();
         config.setModuleURIResolver(xquery_resolver);
+
         // resolver for XSLT
-        URIResolver xslt_resolver = myRepo.getURIResolver(URISpace.XSLT);
-        config.setURIResolver(xslt_resolver);
+        final URIResolver xslt_resolver = myRepo.getURIResolver(URISpace.XSLT);
+        //config.setURIResolver(xslt_resolver);
+        final ResourceResolver builtInResourceResolver = config.getResourceResolver();
+        final ResourceResolver resourceResolver = new ChainedResourceResolver(new ResourceResolverWrappingURIResolver(xslt_resolver), builtInResourceResolver);
+        config.setResourceResolver(resourceResolver);
+
         // the extension functions
         myRepo.registerExtensionFunctions(config);
     }
@@ -45,7 +53,11 @@ public class ConfigHelper
     public void config(Controller control)
             throws PackageException
     {
-        control.setURIResolver(myRepo.getURIResolver(URISpace.XSLT));
+        final URIResolver xslt_resolver = myRepo.getURIResolver(URISpace.XSLT);
+        //control.setURIResolver(xslt_resolver);
+        final ResourceResolver builtInResourceResolver = control.getResourceResolver();
+        final ResourceResolver resourceResolver = new ChainedResourceResolver(new ResourceResolverWrappingURIResolver(xslt_resolver), builtInResourceResolver);
+        control.setResourceResolver(resourceResolver);
     }
 
     /** The repo. */

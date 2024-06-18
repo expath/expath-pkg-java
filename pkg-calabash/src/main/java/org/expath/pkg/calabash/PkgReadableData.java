@@ -145,13 +145,13 @@ public class PkgReadableData
             }
             else {
                 if ( "content/unknown".equals(server_con_type) ) {
-                    attributes.add(new AttributeInfo(new FingerprintedQName(ReadableData.c_contentType.getPrefix(), ReadableData.c_contentType.getNamespaceURI(), ReadableData.c_contentType.getLocalName()), BuiltInAtomicType.STRING, "application/octet-stream", null, 0));
+                    attributes.add(new AttributeInfo(new FingerprintedQName(ReadableData.c_contentType.getPrefix(), NamespaceUri.of(ReadableData.c_contentType.getNamespaceURI()), ReadableData.c_contentType.getLocalName()), BuiltInAtomicType.STRING, "application/octet-stream", null, 0));
                 }
                 else {
-                    attributes.add(new AttributeInfo(new FingerprintedQName(ReadableData.c_contentType.getPrefix(), ReadableData.c_contentType.getNamespaceURI(), ReadableData.c_contentType.getLocalName()), BuiltInAtomicType.STRING, server_con_type, null, 0));
+                    attributes.add(new AttributeInfo(new FingerprintedQName(ReadableData.c_contentType.getPrefix(), NamespaceUri.of(ReadableData.c_contentType.getNamespaceURI()), ReadableData.c_contentType.getLocalName()), BuiltInAtomicType.STRING, server_con_type, null, 0));
                 }
                 if ( ! isText(server_con_type, charset) ) {
-                    attributes.add(new AttributeInfo(new FingerprintedQName(ReadableData.c_encoding.getPrefix(), ReadableData.c_encoding.getNamespaceURI(), ReadableData.c_encoding.getLocalName()), BuiltInAtomicType.STRING, "base64", null, 0));
+                    attributes.add(new AttributeInfo(new FingerprintedQName(ReadableData.c_encoding.getPrefix(), NamespaceUri.of(ReadableData.c_encoding.getNamespaceURI()), ReadableData.c_encoding.getLocalName()), BuiltInAtomicType.STRING, "base64", null, 0));
                 }
             }
             tree.addStartElement(wrapper, new SmallAttributeMap(attributes));

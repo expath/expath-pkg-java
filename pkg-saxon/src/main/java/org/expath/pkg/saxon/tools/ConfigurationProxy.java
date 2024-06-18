@@ -10,8 +10,6 @@
 
 package org.expath.pkg.saxon.tools;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -19,7 +17,6 @@ import java.util.function.Function;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.URIResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.event.Outputter;
@@ -36,6 +33,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.CharacterSetFactory;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
 import net.sf.saxon.type.MissingComponentException;
@@ -85,7 +83,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public SimpleType validateAttribute(StructuredQName name, CharSequence value, int validation) throws ValidationException, MissingComponentException {
+    public SimpleType validateAttribute(StructuredQName name, UnicodeString value, int validation) throws ValidationException, MissingComponentException {
         if ( myConfig == null ) {
             return super.validateAttribute(name, value, validation);
         }
@@ -143,15 +141,6 @@ public class ConfigurationProxy
             return;
         }
         myConfig.setValidation(validation);
-    }
-
-    @Override
-    public void setURIResolver(URIResolver resolver) {
-        if ( myConfig == null ) {
-            super.setURIResolver(resolver);
-            return;
-        }
-        myConfig.setURIResolver(resolver);
     }
 
     @Override
@@ -290,15 +279,6 @@ public class ConfigurationProxy
     }
 
     @Override
-    public void setMessageEmitterClass(String messageReceiverClassName) {
-        if ( myConfig == null ) {
-            super.setMessageEmitterClass(messageReceiverClassName);
-            return;
-        }
-        myConfig.setMessageEmitterClass(messageReceiverClassName);
-    }
-
-    @Override
     public void setLocalizerFactory(LocalizerFactory factory) {
         if ( myConfig == null ) {
             super.setLocalizerFactory(factory);
@@ -335,7 +315,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public void setDynamicLoader(DynamicLoader dynamicLoader) {
+    public void setDynamicLoader(IDynamicLoader dynamicLoader) {
         if ( myConfig == null ) {
             super.setDynamicLoader(dynamicLoader);
             return;
@@ -434,7 +414,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public void sealNamespace(String namespace) {
+    public void sealNamespace(NamespaceUri namespace) {
         if ( myConfig == null ) {
             super.sealNamespace(namespace);
             return;
@@ -452,7 +432,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public Source resolveSource(Source source, Configuration config) throws XPathException {
+    public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
         if ( myConfig == null ) {
             return super.resolveSource(source, config);
         }
@@ -487,7 +467,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public String readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, String expected) throws SchemaException {
+    public NamespaceUri readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected) throws SchemaException {
         if ( myConfig == null ) {
             return super.readSchema(pipe, baseURI, schemaLocation, expected);
         }
@@ -495,7 +475,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, Collection schemaLocations, String expected) throws SchemaException {
+    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, NamespaceUri expected) throws SchemaException {
         if ( myConfig == null ) {
             super.readMultipleSchemas(pipe, baseURI, schemaLocations, expected);
             return;
@@ -504,7 +484,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public String readInlineSchema(NodeInfo root, String expected, ErrorReporter errorReporter) throws SchemaException {
+    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter) throws SchemaException {
         if ( myConfig == null ) {
             return super.readInlineSchema(root, expected, errorReporter);
         }
@@ -533,14 +513,6 @@ public class ConfigurationProxy
             return super.newPendingUpdateList();
         }
         return myConfig.newPendingUpdateList();
-    }
-
-    @Override
-    public URIResolver makeURIResolver(String className) throws TransformerException {
-        if ( myConfig == null ) {
-            return super.makeURIResolver(className);
-        }
-        return myConfig.makeURIResolver(className);
     }
 
     @Override
@@ -673,7 +645,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public boolean isSchemaAvailable(String targetNamespace) {
+    public boolean isSchemaAvailable(NamespaceUri targetNamespace) {
         if ( myConfig == null ) {
             return super.isSchemaAvailable(targetNamespace);
         }
@@ -746,14 +718,6 @@ public class ConfigurationProxy
     }
 
     @Override
-    public URIResolver getURIResolver() {
-        if ( myConfig == null ) {
-            return super.getURIResolver();
-        }
-        return myConfig.getURIResolver();
-    }
-
-    @Override
     public int getTreeModel() {
         if ( myConfig == null ) {
             return super.getTreeModel();
@@ -775,14 +739,6 @@ public class ConfigurationProxy
             return super.getTraceListener();
         }
         return myConfig.getTraceListener();
-    }
-
-    @Override
-    public StandardURIResolver getSystemURIResolver() {
-        if ( myConfig == null ) {
-            return super.getSystemURIResolver();
-        }
-        return myConfig.getSystemURIResolver();
     }
 
     @Override
@@ -890,14 +846,6 @@ public class ConfigurationProxy
     }
 
     @Override
-    public String getMessageEmitterClass() {
-        if ( myConfig == null ) {
-            return super.getMessageEmitterClass();
-        }
-        return myConfig.getMessageEmitterClass();
-    }
-
-    @Override
     public LocalizerFactory getLocalizerFactory() {
         if ( myConfig == null ) {
             return super.getLocalizerFactory();
@@ -914,11 +862,11 @@ public class ConfigurationProxy
     }
 
     @Override
-    public Object getInstance(String className, ClassLoader classLoader) throws XPathException {
+    public Object getInstance(String className) throws XPathException {
         if ( myConfig == null ) {
-            return super.getInstance(className, classLoader);
+            return super.getInstance(className);
         }
-        return myConfig.getInstance(className, classLoader);
+        return myConfig.getInstance(className);
     }
 
     @Override
@@ -962,7 +910,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public Iterator getExtensionsOfType(SchemaType type) {
+    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type) {
         if ( myConfig == null ) {
             return super.getExtensionsOfType(type);
         }
@@ -994,7 +942,7 @@ public class ConfigurationProxy
     }
 
     @Override
-    public DynamicLoader getDynamicLoader() {
+    public IDynamicLoader getDynamicLoader() {
         if ( myConfig == null ) {
             return super.getDynamicLoader();
         }
@@ -1106,11 +1054,11 @@ public class ConfigurationProxy
     }
 
     @Override
-    public Class getClass(String className, boolean tracing, ClassLoader classLoader) throws XPathException {
+    public Class getClass(String className, boolean tracing) throws XPathException {
         if ( myConfig == null ) {
             return super.getClass();
         }
-        return myConfig.getClass(className, tracing, classLoader);
+        return myConfig.getClass(className, tracing);
     }
 
     @Override
